@@ -675,6 +675,22 @@
             { id: 6, status: 'prep', statusIcon: '&#128993;', statusText: 'Připravuje se', project: 'Rekonstrukce budov obce', program: 'SFPI - Živel 3 / Úsporné budovy', support: 'Kombinace', deadline: 'Metodika v přípravě' }
         ];
 
+        function normalizeSubsidyRecord(record, index) {
+            const status = (record.status || record.stav || 'prep').toLowerCase();
+            const normalizedStatus = ['all', 'active', 'prep', 'closed'].includes(status) ? status : 'prep';
+
+            return {
+                id: record.id || index + 1,
+                status: normalizedStatus,
+                statusIcon: record.statusIcon || (normalizedStatus === 'active' ? '&#128994;' : normalizedStatus === 'closed' ? '&#128308;' : '&#128993;'),
+                statusText: record.statusText || (normalizedStatus === 'active' ? 'Aktivní' : normalizedStatus === 'closed' ? 'Uzavřeno' : 'Připravuje se'),
+                project: record.project || record.nazev || 'Neuvedeno',
+                program: record.program || record.poskytovatel || 'Neuvedeno',
+                support: record.support || record.kryti || record.castka || 'Neuvedeno',
+                deadline: record.deadline || record.termin || 'Neuvedeno'
+            };
+        }
+
         let currentActiveProject = projects[0].id;
 
         // --- INIT FUNCTIONS ---
@@ -800,10 +816,11 @@
             tbody.innerHTML = '';
 
             const normalizedFilter = ['all', 'active', 'prep'].includes(filter) ? filter : 'all';
+            const normalizedSubsidies = subsidies.map(normalizeSubsidyRecord);
             
-            let filtered = subsidies;
+            let filtered = normalizedSubsidies;
             if (normalizedFilter !== 'all') {
-                filtered = subsidies.filter(s => s.status === normalizedFilter);
+                filtered = normalizedSubsidies.filter(s => s.status === normalizedFilter);
             }
 
             if (filtered.length === 0) {
