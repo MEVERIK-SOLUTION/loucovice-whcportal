@@ -1,0 +1,22 @@
+# WHC Portal - Cursor Rules
+
+## Git workflow
+- Vzdy pracuj na feature/fix vetvi.
+- Nikdy neprovadej zmeny primo na `main`.
+- Commit po kazdem logickem kroku.
+- Push vetve pouzij pro vytvoreni Vercel Preview URL.
+- Merge do `main` provadej pouze po explicitnim schvaleni uzivatelem.
+
+## Deploy pravidla
+- Preview deployment je povinny pro kazdou branch.
+- Production deployment jen po review a schvaleni.
+- Produkcni URL je https://loucovice-whcportal.vercel.app/
+
+## Kodovaci pravidla
+- Pouzivej pouze HTML/CSS/JS bez npm a bez build kroku.
+- Zmeny provadej prednostne v `Loucovice_index.helloweb/index.html`.
+- Chart.js nacitej pres CDN a ponech `responsive: true`.
+
+## Komunikace
+- Po pushi branch vzdy vrat Preview URL.
+- Pred mergem do `main` cekej na potvrzeni uzivatele.
