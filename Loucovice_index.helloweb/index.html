@@ -98,31 +98,156 @@
         .swot-card:hover {
             transform: scale(1.02);
         }
+
+        /* Password Gate */
+        #password-gate {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1e3a8a 0%, #064e3b 100%);
+        }
+        #password-gate.hidden-gate {
+            display: none;
+        }
+        .gate-card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 32px 64px rgba(0,0,0,0.35);
+            padding: 2.5rem 2rem;
+            max-width: 420px;
+            width: 100%;
+            margin: 1rem;
+            animation: slideUp 0.4s ease;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        #pwd-input {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            text-align: center;
+            letter-spacing: 0.15em;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        #pwd-input:focus { border-color: #1e3a8a; }
+        #pwd-input.error  { border-color: #dc2626; animation: shake 0.35s ease; }
+        @keyframes shake {
+            0%,100% { transform: translateX(0); }
+            20%,60% { transform: translateX(-8px); }
+            40%,80% { transform: translateX(8px); }
+        }
+        #pwd-submit {
+            width: 100%;
+            padding: 0.85rem;
+            background: #1e3a8a;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            margin-top: 0.75rem;
+        }
+        #pwd-submit:hover  { background: #1e40af; }
+        #pwd-submit:active { transform: scale(0.98); }
+
+        /* Top bar */
+        #top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 1.5rem;
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        /* Mobile nav toggle */
+        #mobile-nav-toggle { display: none; }
+        @media (max-width: 768px) {
+            #mobile-nav-toggle { display: flex; }
+            nav { max-height: 64px; overflow: hidden; transition: max-height 0.35s ease; }
+            nav.nav-open { max-height: 100vh; }
+        }
+
+        /* Section fade-in on scroll */
+        .fade-section {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.55s ease, transform 0.55s ease;
+        }
+        .fade-section.visible {
+            opacity: 1;
+            transform: none;
+        }
+
+        /* Back-to-top button */
+        #back-top {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            width: 44px;
+            height: 44px;
+            background: #1e3a8a;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.25rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 100;
+        }
+        #back-top.visible { opacity: 1; pointer-events: auto; }
     </style>
 </head>
 <body class="flex flex-col md:flex-row h-screen overflow-hidden">
 
-    <!-- Chosen Palette: Deep River Blue (#1e3a8a) & Forest Green (#047857) with Warm Slate background (#f8fafc). Accent Orange (#ea580c). -->
-    
-    <!-- Application Structure Plan: The SPA uses a "Dashboard / Executive Summary" structure. It's divided into a fixed sidebar for constant contextual navigation and a scrollable main content area. This allows stakeholders (mayor, council, investors) to quickly jump between high-level strategy (Vision, SWOT), concrete implementations (Projects), financial backing (Subsidies), and management processes (BIM/CDE). The interactive project explorer and dynamic subsidy table prioritize immediate data retrieval over reading static text. -->
-    
-    <!-- Visualization & Content Choices: 
-         1. Financial Overview -> Goal: Compare expected costs vs. subsidies -> Viz: Bar Chart (Chart.js) -> Interaction: Tooltips on hover -> Justifies: Clear ROI visualization.
-         2. Budget Allocation -> Goal: Show proportions -> Viz: Doughnut Chart (Chart.js) -> Interaction: Legend toggle -> Justifies: Quick understanding of priorities.
-         3. SWOT Analysis -> Goal: Organize strategic points -> Viz: 2x2 CSS Grid Cards -> Interaction: Hover states -> Justifies: Clean, readable formatting.
-         4. Project Explorer -> Goal: Detailed exploration -> Viz: Master-Detail view (Grid/Flex) -> Interaction: Click list to update detail pane -> Justifies: Avoids cluttering the screen with text.
-         5. Subsidy Semaphore -> Goal: Organize & Filter -> Viz: Interactive HTML Table -> Interaction: Status filters -> Justifies: Practical tool for municipal management.
-         Library: Chart.js for canvas charts. Tailwind for layout. Vanilla JS for logic. 
-    -->
-
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <!-- Password Gate -->
+    <div id="password-gate">
+        <div class="gate-card">
+            <div style="text-align:center;margin-bottom:1.5rem;">
+                <div style="font-size:3rem;margin-bottom:0.5rem;">🌊🌲</div>
+                <h1 style="font-family:'Poppins',sans-serif;font-size:1.35rem;font-weight:700;color:#1e3a8a;margin:0 0 0.25rem;">Portál obce Loučovice</h1>
+                <p style="font-size:0.85rem;color:#64748b;margin:0;">Zadejte přístupové heslo pro vstup do portálu</p>
+            </div>
+            <input type="password" id="pwd-input" placeholder="••••••••••••"
+                   autocomplete="off"
+                   onkeydown="if(event.key==='Enter')gateSubmit()">
+            <button id="pwd-submit" onclick="gateSubmit()">Vstoupit →</button>
+            <p id="pwd-error" style="color:#dc2626;font-size:0.8rem;text-align:center;margin-top:0.6rem;min-height:1.1em;"></p>
+            <p style="font-size:0.7rem;color:#94a3b8;text-align:center;margin-top:1rem;">
+                WHC s.r.o. &copy; 2026 &mdash; Důvěrný dokument
+            </p>
+        </div>
+    </div>
 
     <!-- Sidebar Navigation -->
-    <nav class="w-full md:w-64 bg-white shadow-xl flex flex-col z-20 md:h-full">
-        <div class="p-6 bg-loucovice-blue text-white text-center">
+    <nav id="sidebar" class="w-full md:w-64 bg-white shadow-xl flex flex-col z-20 md:h-full">
+        <div class="p-6 bg-loucovice-blue text-white text-center relative">
             <div class="text-4xl mb-2">🌊🌲</div>
             <h1 class="text-xl font-bold tracking-tight">LOUČOVICE</h1>
             <p class="text-xs text-blue-200 mt-1 uppercase tracking-wider">Strategický Portál 2.0</p>
+            <!-- Mobile toggle -->
+            <button id="mobile-nav-toggle" onclick="toggleMobileNav()"
+                aria-label="Toggle navigation"
+                class="absolute top-4 right-4 md:hidden text-white flex-col gap-1 p-1">
+                <span class="block w-6 h-0.5 bg-white"></span>
+                <span class="block w-6 h-0.5 bg-white mt-1"></span>
+                <span class="block w-6 h-0.5 bg-white mt-1"></span>
+            </button>
         </div>
         <div class="flex-1 overflow-y-auto py-4 flex flex-col gap-1 px-3" id="nav-links">
             <button onclick="scrollToSection('uvod')" class="nav-link w-full text-left px-4 py-3 rounded text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors active">
@@ -144,14 +269,24 @@
         <div class="p-4 border-t border-slate-200 text-xs text-slate-400 text-center">
             Zpracováno dle metodiky<br>
             <strong class="text-slate-600">WHC s.r.o.</strong> &copy; 2026
+            <br><button onclick="gateLogout()" class="mt-2 text-slate-400 hover:text-red-500 transition-colors underline text-xs">Odhlásit se</button>
         </div>
     </nav>
 
+    <!-- Back-to-top button -->
+    <button id="back-top" onclick="backToTop()" title="Zpět nahoru">&#8679;</button>
+
     <!-- Main Content -->
-    <main class="flex-1 overflow-y-auto scroll-smooth" id="main-content">
+    <main class="flex-1 overflow-y-auto scroll-smooth flex flex-col" id="main-content">
+
+        <!-- Top bar -->
+        <div id="top-bar">
+            <span>📋 SR-LOU-2026-V2 &mdash; Důvěrný strategický dokument</span>
+            <span id="top-bar-date"></span>
+        </div>
         
         <!-- SECTION: Úvod -->
-        <section id="uvod" class="min-h-screen p-8 md:p-12 lg:p-16 flex flex-col justify-center max-w-7xl mx-auto">
+        <section id="uvod" class="fade-section min-h-screen p-8 md:p-12 lg:p-16 flex flex-col justify-center max-w-7xl mx-auto">
             <div class="mb-8">
                 <span class="inline-block py-1 px-3 rounded-full bg-loucovice-blue text-white text-xs font-bold uppercase tracking-wider mb-4">Vize 2030</span>
                 <h2 class="text-4xl md:text-5xl font-bold text-loucovice-blue mb-6 leading-tight">Transformace Loučovic:<br>Z průmyslového centra do srdce Lipenska</h2>
@@ -183,7 +318,7 @@
         </section>
 
         <!-- SECTION: Data & SWOT -->
-        <section id="data-swot" class="min-h-screen bg-white p-8 md:p-12 lg:p-16 border-t border-slate-200">
+        <section id="data-swot" class="fade-section min-h-screen bg-white p-8 md:p-12 lg:p-16 border-t border-slate-200">
             <div class="max-w-7xl mx-auto">
                 <div class="mb-12">
                     <h2 class="text-3xl font-bold text-loucovice-blue mb-4">Analýza potenciálu a SWOT</h2>
@@ -263,7 +398,7 @@
         </section>
 
         <!-- SECTION: Rozvojové projekty -->
-        <section id="projekty" class="min-h-screen bg-slate-50 p-8 md:p-12 lg:p-16 border-t border-slate-200">
+        <section id="projekty" class="fade-section min-h-screen bg-slate-50 p-8 md:p-12 lg:p-16 border-t border-slate-200">
             <div class="max-w-7xl mx-auto">
                 <div class="mb-10">
                     <h2 class="text-3xl font-bold text-loucovice-blue mb-4">Strategické rozvojové projekty</h2>
@@ -290,7 +425,7 @@
         </section>
 
         <!-- SECTION: Dotační semafor -->
-        <section id="dotace" class="min-h-screen bg-white p-8 md:p-12 lg:p-16 border-t border-slate-200">
+        <section id="dotace" class="fade-section min-h-screen bg-white p-8 md:p-12 lg:p-16 border-t border-slate-200">
             <div class="max-w-7xl mx-auto">
                 <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                     <div>
@@ -328,7 +463,7 @@
         </section>
 
         <!-- SECTION: Digitalizace & CDE -->
-        <section id="digitalizace" class="min-h-screen bg-slate-800 text-white p-8 md:p-12 lg:p-16 border-t border-slate-700">
+        <section id="digitalizace" class="fade-section min-h-screen bg-slate-800 text-white p-8 md:p-12 lg:p-16 border-t border-slate-700">
             <div class="max-w-7xl mx-auto">
                 <div class="mb-12">
                     <span class="inline-block py-1 px-3 rounded-full bg-slate-700 text-slate-300 text-xs font-bold uppercase tracking-wider mb-4">Management & Řízení</span>
@@ -361,10 +496,103 @@
             </div>
         </section>
 
+        <!-- Site Footer -->
+        <footer class="bg-slate-900 text-slate-400 text-xs py-6 px-8 text-center border-t border-slate-700 mt-auto">
+            <p class="mb-1">
+                <strong class="text-white">Portál obce Loučovice</strong> &mdash; Strategický dokument SR-LOU-2026-V2 &mdash; Důvěrné
+            </p>
+            <p>
+                Zpracováno metodikou <strong class="text-slate-300">WHC s.r.o.</strong> &copy; 2026 &nbsp;|&nbsp;
+                <a href="https://www.loucovice.info/" target="_blank" rel="noopener noreferrer"
+                   class="text-blue-400 hover:text-blue-300 underline transition-colors">
+                    Oficiální web obce
+                </a>
+            </p>
+        </footer>
+
     </main>
 
     <!-- JS Logic -->
     <script>
+        // =====================================================
+        // PASSWORD GATE
+        // =====================================================
+        (function initGate() {
+            if (sessionStorage.getItem('whc_auth') === '1') {
+                document.getElementById('password-gate').classList.add('hidden-gate');
+            }
+        })();
+
+        function gateSubmit() {
+            const input = document.getElementById('pwd-input');
+            const err   = document.getElementById('pwd-error');
+            const val = input.value;
+            const ok  = val === 'LOUCOVICE\u004026'; // access code for discretion
+            if (ok) {
+                sessionStorage.setItem('whc_auth', '1');
+                document.getElementById('password-gate').classList.add('hidden-gate');
+                err.textContent = '';
+            } else {
+                err.textContent = 'Nesprávné heslo. Zkuste to znovu.';
+                input.classList.add('error');
+                input.value = '';
+                setTimeout(() => { input.classList.remove('error'); input.focus(); }, 400);
+            }
+        }
+
+        function gateLogout() {
+            sessionStorage.removeItem('whc_auth');
+            location.reload();
+        }
+
+        // =====================================================
+        // MOBILE NAV TOGGLE
+        // =====================================================
+        function toggleMobileNav() {
+            document.getElementById('sidebar').classList.toggle('nav-open');
+        }
+
+        // =====================================================
+        // BACK-TO-TOP
+        // =====================================================
+        function backToTop() {
+            document.getElementById('main-content').scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // =====================================================
+        // TOP BAR DATE
+        // =====================================================
+        document.getElementById('top-bar-date').textContent =
+            new Date().toLocaleDateString('cs-CZ', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+        // =====================================================
+        // SECTION FADE-IN (IntersectionObserver)
+        // =====================================================
+        function initFadeIn() {
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.08, root: document.getElementById('main-content') });
+
+            document.querySelectorAll('.fade-section').forEach(function(el) {
+                observer.observe(el);
+            });
+        }
+
+        // =====================================================
+        // BACK-TO-TOP VISIBILITY
+        // =====================================================
+        function initBackTop() {
+            const btn = document.getElementById('back-top');
+            document.getElementById('main-content').addEventListener('scroll', function() {
+                btn.classList.toggle('visible', this.scrollTop > 300);
+            });
+        }
+
         // --- DATA STATE ---
         const projects = [
             {
@@ -437,6 +665,8 @@
             showProjectDetails(currentActiveProject);
             renderSubsidyTable('all');
             setupScrollSpy();
+            initFadeIn();
+            initBackTop();
         };
 
         // --- NAVIGATION & SCROLL SPY ---
