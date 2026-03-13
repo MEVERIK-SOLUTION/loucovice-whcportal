@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="cs" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategická studie rozvoje obce Loučovice 2025–2030</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        loucovice: {
+                            blue: '#1e3a8a', // Deep river blue (Vltava)
+                            green: '#047857', // Forest green (Šumava)
+                            light: '#f8fafc', // Warm neutral background
+                            accent: '#ea580c', // Subtle warm accent for CTA
+                            card: '#ffffff'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        heading: ['Poppins', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Core styling and animations */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Mandatory Chart Container Styling */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 250px;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Interactive Elements styling */
+        .nav-link.active {
+            background-color: #1e3a8a;
+            color: white;
+            border-left: 4px solid #047857;
+        }
+        
+        .project-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .project-card:hover, .project-card.active {
+            border-color: #1e3a8a;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .swot-card {
+            transition: transform 0.3s ease;
+        }
+        .swot-card:hover {
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row h-screen overflow-hidden">
+
+    <!-- Chosen Palette: Deep River Blue (#1e3a8a) & Forest Green (#047857) with Warm Slate background (#f8fafc). Accent Orange (#ea580c). -->
+    
+    <!-- Application Structure Plan: The SPA uses a "Dashboard / Executive Summary" structure. It's divided into a fixed sidebar for constant contextual navigation and a scrollable main content area. This allows stakeholders (mayor, council, investors) to quickly jump between high-level strategy (Vision, SWOT), concrete implementations (Projects), financial backing (Subsidies), and management processes (BIM/CDE). The interactive project explorer and dynamic subsidy table prioritize immediate data retrieval over reading static text. -->
+    
+    <!-- Visualization & Content Choices: 
+         1. Financial Overview -> Goal: Compare expected costs vs. subsidies -> Viz: Bar Chart (Chart.js) -> Interaction: Tooltips on hover -> Justifies: Clear ROI visualization.
+         2. Budget Allocation -> Goal: Show proportions -> Viz: Doughnut Chart (Chart.js) -> Interaction: Legend toggle -> Justifies: Quick understanding of priorities.
+         3. SWOT Analysis -> Goal: Organize strategic points -> Viz: 2x2 CSS Grid Cards -> Interaction: Hover states -> Justifies: Clean, readable formatting.
+         4. Project Explorer -> Goal: Detailed exploration -> Viz: Master-Detail view (Grid/Flex) -> Interaction: Click list to update detail pane -> Justifies: Avoids cluttering the screen with text.
+         5. Subsidy Semaphore -> Goal: Organize & Filter -> Viz: Interactive HTML Table -> Interaction: Status filters -> Justifies: Practical tool for municipal management.
+         Library: Chart.js for canvas charts. Tailwind for layout. Vanilla JS for logic. 
+    -->
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- Sidebar Navigation -->
+    <nav class="w-full md:w-64 bg-white shadow-xl flex flex-col z-20 md:h-full">
+        <div class="p-6 bg-loucovice-blue text-white text-center">
+            <div class="text-4xl mb-2">🌊🌲</div>
+            <h1 class="text-xl font-bold tracking-tight">LOUČOVICE</h1>
+            <p class="text-xs text-blue-200 mt-1 uppercase tracking-wider">Strategický Portál 2.0</p>
+        </div>
+        <div class="flex-1 overflow-y-auto py-4 flex flex-col gap-1 px-3" id="nav-links">
+            <button onclick="scrollToSection('uvod')" class="nav-link w-full text-left px-4 py-3 rounded text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors active">
+                &#128203; Executive Summary
+            </button>
+            <button onclick="scrollToSection('data-swot')" class="nav-link w-full text-left px-4 py-3 rounded text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors">
+                &#128202; Analýza a SWOT
+            </button>
+            <button onclick="scrollToSection('projekty')" class="nav-link w-full text-left px-4 py-3 rounded text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors">
+                &#127959;&#65039; Rozvojové projekty
+            </button>
+            <button onclick="scrollToSection('dotace')" class="nav-link w-full text-left px-4 py-3 rounded text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors">
+                &#128176; Dotační semafor
+            </button>
+            <button onclick="scrollToSection('digitalizace')" class="nav-link w-full text-left px-4 py-3 rounded text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors">
+                &#128187; CDE & Digitalizace
+            </button>
+        </div>
+        <div class="p-4 border-t border-slate-200 text-xs text-slate-400 text-center">
+            Zpracováno dle metodiky<br>
+            <strong class="text-slate-600">WHC s.r.o.</strong> &copy; 2026
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto scroll-smooth" id="main-content">
+        
+        <!-- SECTION: Úvod -->
+        <section id="uvod" class="min-h-screen p-8 md:p-12 lg:p-16 flex flex-col justify-center max-w-7xl mx-auto">
+            <div class="mb-8">
+                <span class="inline-block py-1 px-3 rounded-full bg-loucovice-blue text-white text-xs font-bold uppercase tracking-wider mb-4">Vize 2030</span>
+                <h2 class="text-4xl md:text-5xl font-bold text-loucovice-blue mb-6 leading-tight">Transformace Loučovic:<br>Z průmyslového centra do srdce Lipenska</h2>
+                <p class="text-lg text-slate-600 mb-6 max-w-3xl leading-relaxed">
+                    Tento interaktivní portál představuje <strong>rozšířenou strategickou studii rozvoje obce Loučovice</strong> na období 2025–2030. Zde naleznete syntézu klíčových dat, dotačních příležitostí a projektových záměrů. Naším cílem je provést obec udržitelným přechodem – od historie papírenství k moderní rezidenční oblasti a turistickému uzlu napojenému na fenomén <em>Divoké vody Loučovice</em>.
+                </p>
+                <p class="text-slate-600 mb-8 max-w-3xl">
+                    <em>Jak portál používat:</em> Posouvejte stránku dolů nebo využijte navigaci vlevo. Prozkoumejte interaktivní grafy, kliknutím na projektové karty zobrazte detaily a využijte dotační semafor pro filtraci aktuálních výzev (IROP, SFPI, atd.).
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-loucovice-blue">
+                    <div class="text-3xl mb-3">&#128104;&#8205;&#128105;&#8205;&#128103;&#8205;&#128102;</div>
+                    <h3 class="text-xl font-bold mb-2">Demografie a Bydlení</h3>
+                    <p class="text-slate-500 text-sm">Zastavení odlivu obyvatel pomocí nových projektů dostupného bydlení (SFPI) v lokalitě Dvorečná.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-loucovice-green">
+                    <div class="text-3xl mb-3">&#127959;&#65039;</div>
+                    <h3 class="text-xl font-bold mb-2">Revitalizace Brownfieldů</h3>
+                    <p class="text-slate-500 text-sm">Přeměna starých průmyslových areálů (Sv. Prokop) na moderní multifunkční zóny s podporou NPO.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-loucovice-accent">
+                    <div class="text-3xl mb-3">&#128267;</div>
+                    <h3 class="text-xl font-bold mb-2">Chytrá Energetika</h3>
+                    <p class="text-slate-500 text-sm">Snížení provozních nákladů obce instalací FVE a zapojením do komunitní energetiky.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: Data & SWOT -->
+        <section id="data-swot" class="min-h-screen bg-white p-8 md:p-12 lg:p-16 border-t border-slate-200">
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-12">
+                    <h2 class="text-3xl font-bold text-loucovice-blue mb-4">Analýza potenciálu a SWOT</h2>
+                    <p class="text-slate-600 max-w-3xl">Tato sekce vizualizuje finanční trajektorii strategických záměrů a definuje silné a slabé stránky obce. Grafy představují odhadované investiční náklady a dotační krytí na základě hloubkové analýzy dotačních titulů (IROP, OPŽP, SFPI).</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+                    <!-- Charts -->
+                    <div class="space-y-8">
+                        <div class="bg-slate-50 p-6 rounded-xl border border-slate-100 shadow-sm">
+                            <h3 class="text-lg font-bold text-slate-800 mb-2 text-center">Plánované investice vs. Očekávané dotace (v mil. Kč)</h3>
+                            <div class="chart-container">
+                                <canvas id="investChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 p-6 rounded-xl border border-slate-100 shadow-sm">
+                            <h3 class="text-lg font-bold text-slate-800 mb-2 text-center">Rozložení dotačního portfolia</h3>
+                            <div class="chart-container">
+                                <canvas id="budgetChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SWOT -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="swot-card bg-emerald-50 p-6 rounded-xl border border-emerald-100">
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="text-2xl">&#128170;</span>
+                                <h3 class="text-xl font-bold text-emerald-800">Silné stránky</h3>
+                            </div>
+                            <ul class="space-y-2 text-sm text-emerald-900 list-disc pl-4">
+                                <li>Unikátní poloha mezi vodní nádrží Lipno a Vltavou.</li>
+                                <li>Přírodní bohatství a napojení na rakouské pohraničí.</li>
+                                <li>Silná značka "Divoká voda Loučovice".</li>
+                                <li>Dostatek rozvojových ploch (přepracovaný ÚP).</li>
+                            </ul>
+                        </div>
+                        <div class="swot-card bg-red-50 p-6 rounded-xl border border-red-100">
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="text-2xl">&#9888;&#65039;</span>
+                                <h3 class="text-xl font-bold text-red-800">Slabé stránky</h3>
+                            </div>
+                            <ul class="space-y-2 text-sm text-red-900 list-disc pl-4">
+                                <li>Rozsáhlé nevyužité brownfieldy v centru obce.</li>
+                                <li>Odliv mladých rodin kvůli nedostatku moderního bydlení.</li>
+                                <li>Zhoršená dopravní dostupnost v zimních měsících.</li>
+                                <li>Vysoká energetická náročnost obecních budov.</li>
+                            </ul>
+                        </div>
+                        <div class="swot-card bg-blue-50 p-6 rounded-xl border border-blue-100">
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="text-2xl">&#128640;</span>
+                                <h3 class="text-xl font-bold text-blue-800">Příležitosti</h3>
+                            </div>
+                            <ul class="space-y-2 text-sm text-blue-900 list-disc pl-4">
+                                <li>Masivní dotační alokace z IROP 2021-2027 a SFPI.</li>
+                                <li>Rozvoj cykloturistiky (propojení s Vyšším Brodem).</li>
+                                <li>Implementace Light BIM a CDE pro efektivní správu.</li>
+                                <li>Možnost využití PPP projektů pro velké areály.</li>
+                            </ul>
+                        </div>
+                        <div class="swot-card bg-amber-50 p-6 rounded-xl border border-amber-100">
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="text-2xl">&#128300;</span>
+                                <h3 class="text-xl font-bold text-amber-800">Hrozby</h3>
+                            </div>
+                            <ul class="space-y-2 text-sm text-amber-900 list-disc pl-4">
+                                <li>Růst cen stavebních prací a materiálů.</li>
+                                <li>Zpoždění v aktualizacích územního plánu.</li>
+                                <li>Vyčerpání dotačních alokací před podáním žádostí.</li>
+                                <li>Ztráta autenticity obce při nekontrolovaném turismu.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: Rozvojové projekty -->
+        <section id="projekty" class="min-h-screen bg-slate-50 p-8 md:p-12 lg:p-16 border-t border-slate-200">
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-10">
+                    <h2 class="text-3xl font-bold text-loucovice-blue mb-4">Strategické rozvojové projekty</h2>
+                    <p class="text-slate-600 max-w-3xl">Interaktivní průvodce klíčovými zónami rozvoje. Vybírejte z projektů v levém sloupci pro zobrazení detailního popisu, odhadovaných nákladů a doporučené dotační synergie v pravém panelu.</p>
+                </div>
+
+                <div class="flex flex-col lg:flex-row gap-8">
+                    <!-- Project List -->
+                    <div class="w-full lg:w-1/3 flex flex-col gap-3" id="project-list">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <!-- Project Detail -->
+                    <div class="w-full lg:w-2/3 bg-white p-8 rounded-xl shadow-lg border border-slate-200" id="project-detail">
+                        <div class="flex items-center justify-center h-full text-slate-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-3">&#128072;</div>
+                                <p>Vyberte projekt ze seznamu pro zobrazení detailů.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: Dotační semafor -->
+        <section id="dotace" class="min-h-screen bg-white p-8 md:p-12 lg:p-16 border-t border-slate-200">
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+                    <div>
+                        <h2 class="text-3xl font-bold text-loucovice-blue mb-4">Dotační semafor a harmonogram</h2>
+                        <p class="text-slate-600 max-w-2xl">Přehled identifikovaných dotačních titulů asociovaných se strategickými projekty obce. Obsahuje data z aktuálních výzev SFPI, IROP a SFŽP. Pomocí tlačítek můžete filtrovat dle stavu výzvy.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="filterTable('all')" class="px-4 py-2 bg-slate-800 text-white rounded text-sm font-medium hover:bg-slate-700 transition">Vše</button>
+                        <button onclick="filterTable('active')" class="px-4 py-2 bg-loucovice-green text-white rounded text-sm font-medium hover:bg-emerald-600 transition">Aktivní</button>
+                        <button onclick="filterTable('prep')" class="px-4 py-2 bg-amber-500 text-white rounded text-sm font-medium hover:bg-amber-600 transition">Připravuje se</button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto bg-white rounded-xl shadow-sm border border-slate-200">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 text-sm uppercase tracking-wider">
+                                <th class="p-4 border-b font-bold">Stav</th>
+                                <th class="p-4 border-b font-bold">Záměr obce</th>
+                                <th class="p-4 border-b font-bold">Dotační program / Poskytovatel</th>
+                                <th class="p-4 border-b font-bold">Míra podpory</th>
+                                <th class="p-4 border-b font-bold">Termín / Harmonogram</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subsidy-tbody" class="text-slate-700 text-sm">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-6 p-4 bg-blue-50 border-l-4 border-loucovice-blue rounded-r text-sm text-blue-900">
+                    <strong>💡 Finanční inženýrství WHC:</strong> Pro kofinancování (zbylých 15–40 %) doporučujeme obci využít zvýhodněné úvěry od Národní rozvojové banky (NRB), případně kombinovat dotace IROP s programem Živel 3 od SFPI pro komplexní rekonstrukce.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: Digitalizace & CDE -->
+        <section id="digitalizace" class="min-h-screen bg-slate-800 text-white p-8 md:p-12 lg:p-16 border-t border-slate-700">
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-12">
+                    <span class="inline-block py-1 px-3 rounded-full bg-slate-700 text-slate-300 text-xs font-bold uppercase tracking-wider mb-4">Management & Řízení</span>
+                    <h2 class="text-3xl font-bold mb-4">Digitalizace správy: CDE a BIM</h2>
+                    <p class="text-slate-300 max-w-3xl">Pro úspěšné zvládnutí portfolia investičních projektů nelze spoléhat na papírové šanony. Součástí strategického rozvoje je zavedení moderního řízení pomocí Datového prostředí (CDE) a informačního modelování (BIM), koordinovaného WHC s.r.o.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+                    <!-- Connecting line for desktop -->
+                    <div class="hidden md:block absolute top-1/2 left-0 w-full h-1 bg-slate-700 -z-10 transform -translate-y-1/2"></div>
+                    
+                    <div class="bg-slate-900 p-6 rounded-xl border border-slate-700 relative z-10">
+                        <div class="w-12 h-12 bg-loucovice-blue rounded-full flex items-center justify-center text-xl font-bold mb-4 border-4 border-slate-800 mx-auto">1</div>
+                        <h3 class="text-lg font-bold mb-2 text-center text-blue-300">Sběr dat & Analýza</h3>
+                        <p class="text-slate-400 text-sm text-center">Měsíc 1–2: Provedení Light BIM skenování klíčových obecních budov. Pasportizace majetku a založení struktury v CDE.</p>
+                    </div>
+
+                    <div class="bg-slate-900 p-6 rounded-xl border border-slate-700 relative z-10">
+                        <div class="w-12 h-12 bg-loucovice-green rounded-full flex items-center justify-center text-xl font-bold mb-4 border-4 border-slate-800 mx-auto">2</div>
+                        <h3 class="text-lg font-bold mb-2 text-center text-emerald-300">Příprava projektů</h3>
+                        <p class="text-slate-400 text-sm text-center">Měsíc 3–4: Zpracování projektových dokumentací (DSP) s využitím 3D modelů. Přístup pro vedení obce do sdíleného portálu.</p>
+                    </div>
+
+                    <div class="bg-slate-900 p-6 rounded-xl border border-slate-700 relative z-10">
+                        <div class="w-12 h-12 bg-loucovice-accent rounded-full flex items-center justify-center text-xl font-bold mb-4 border-4 border-slate-800 mx-auto">3</div>
+                        <h3 class="text-lg font-bold mb-2 text-center text-orange-300">Dotační management</h3>
+                        <p class="text-slate-400 text-sm text-center">Měsíc 5–6: Export přesných výkazů výměr z BIM modelu. Podání žádostí v systému MS2021+ (IROP) a AIS (SFPI).</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JS Logic -->
+    <script>
+        // --- DATA STATE ---
+        const projects = [
+            {
+                id: 'dvorecna',
+                title: 'Obytná zóna Dvorečná',
+                icon: '&#127960;&#65039;',
+                shortDesc: 'Výstavba infrastruktury pro nové rodinné a dostupné nájemní bydlení.',
+                fullDesc: 'Reakce na úbytek obyvatel. V rámci změny ÚP č. 6 je oblast Dvorečná vyčleněna pro rezidenční zástavbu. Obec musí zajistit základní technickou infrastrukturu (voda, kanalizace, komunikace). Následně zde mohou vzniknout rodinné domy a objekt pro dostupné nájemní bydlení s podporou SFPI.',
+                budget: '45 mil. Kč',
+                subsidyMatch: 'SFPI - Technická infrastruktura / Dostupné nájemní bydlení',
+                status: 'Ve fázi studie'
+            },
+            {
+                id: 'brownfield',
+                title: 'Brownfield Sv. Prokop',
+                icon: '&#127959;&#65039;',
+                shortDesc: 'Revitalizace bývalého průmyslového areálu na komerčně-rekreační zónu.',
+                fullDesc: 'Zásadní strategický projekt pro odklon od těžkého průmyslu. Areál historické papírny bude částečně zbourán a sanován, historicky cenné budovy zachovány. Cílem je vytvořit zázemí pro drobnou komerci, služby spojené s turismem ("Divoká voda") a veřejný prostor.',
+                budget: '120 mil. Kč',
+                subsidyMatch: 'NPO - Revitalizace brownfieldů / OP TAK',
+                status: 'Příprava demolice'
+            },
+            {
+                id: 'cyklo',
+                title: 'Cyklostezka Loučovice - Vyšší Brod',
+                icon: '&#128690;',
+                shortDesc: 'Bezpečné propojení obcí podél Vltavy mimo hlavní tah.',
+                fullDesc: 'Klíčový projekt pro rozvoj udržitelného turismu a zvýšení bezpečnosti obyvatel. Úsek podél řeky Vltavy napojí Loučovice na páteřní šumavskou cyklosíť a uleví frekventované silnici II/163.',
+                budget: '35 mil. Kč',
+                subsidyMatch: 'SFDI - Cyklistická infrastruktura / IROP',
+                status: 'Územní rozhodnutí'
+            },
+            {
+                id: 'energetika',
+                title: 'Chytrá energetika & FVE',
+                icon: '&#128267;',
+                shortDesc: 'Fotovoltaika na budově OÚ a základní školy, příprava sdílení.',
+                fullDesc: 'Snížení provozních nákladů veřejných budov. Na střechách obecního úřadu a ZŠ budou instalovány FVE panely s bateriovým úložištěm. Projekt počítá s budoucím založením energetického společenství pro sdílení přebytků v obci.',
+                budget: '8 mil. Kč',
+                subsidyMatch: 'Modernizační fond (RES+) / OP ŽP',
+                status: 'Energetický posudek'
+            },
+            {
+                id: 'prostoru',
+                title: 'Obnova veřejných prostranství',
+                icon: '&#127795;',
+                shortDesc: 'Zelená infrastruktura, výsadba a úprava centra obce.',
+                fullDesc: 'Zlepšení mikroklimatu a estetiky centra obce. Výsadba stromořadí, budování propustných povrchů pro zadržování vody v krajině a instalace nového, energeticky úsporného veřejného osvětlení.',
+                budget: '15 mil. Kč',
+                subsidyMatch: 'IROP - Zelená infrastruktura',
+                status: 'Plánování'
+            }
+        ];
+
+        const subsidies = [
+            { id: 1, status: 'active', statusIcon: '&#128994;', statusText: 'Aktivní', project: 'Obytná zóna Dvorečná', program: 'SFPI - Dostupné nájemní bydlení', support: 'Dotace 25 % + Zvýhodněný úvěr', deadline: 'Průběžná do vyčerpání' },
+            { id: 2, status: 'prep', statusIcon: '&#128993;', statusText: 'Připravuje se', project: 'Brownfield Sv. Prokop', program: 'NPO / MMR (Brownfieldy)', support: 'Až 60 %', deadline: 'Výzva očekávána Q1 2026' },
+            { id: 3, status: 'active', statusIcon: '&#128994;', statusText: 'Aktivní', project: 'Cyklostezka V. Brod', program: 'IROP 2021-2027 (Čistá mobilita)', support: '85 %', deadline: 'Otevřená kolová výzva' },
+            { id: 4, status: 'active', statusIcon: '&#128994;', statusText: 'Aktivní', project: 'FVE na OÚ a školu', program: 'Modernizační fond (RES+)', support: 'Až 75 %', deadline: 'Průběžná do 10/2026' },
+            { id: 5, status: 'closed', statusIcon: '&#128308;', statusText: 'Uzavřeno', project: 'Obnova prostranství', program: 'IROP (Zelená infrastruktura)', support: '85 %', deadline: 'Další kolo 2027' },
+            { id: 6, status: 'prep', statusIcon: '&#128993;', statusText: 'Připravuje se', project: 'Rekonstrukce budov obce', program: 'SFPI - Živel 3 / Úsporné budovy', support: 'Kombinace', deadline: 'Metodika v přípravě' }
+        ];
+
+        let currentActiveProject = projects[0].id;
+
+        // --- INIT FUNCTIONS ---
+        window.onload = function() {
+            initCharts();
+            renderProjectList();
+            showProjectDetails(currentActiveProject);
+            renderSubsidyTable('all');
+            setupScrollSpy();
+        };
+
+        // --- NAVIGATION & SCROLL SPY ---
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function setupScrollSpy() {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const mainContent = document.getElementById('main-content');
+
+            mainContent.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.clientHeight;
+                    if (mainContent.scrollTop >= (sectionTop - sectionHeight / 3)) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('onclick').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        }
+
+        // --- RENDER PROJECTS ---
+        function renderProjectList() {
+            const listEl = document.getElementById('project-list');
+            listEl.innerHTML = '';
+            
+            projects.forEach(proj => {
+                const card = document.createElement('div');
+                card.className = `project-card bg-white p-4 rounded-lg shadow-sm flex items-start gap-4 ${proj.id === currentActiveProject ? 'active' : ''}`;
+                card.onclick = () => showProjectDetails(proj.id);
+                
+                card.innerHTML = `
+                    <div class="text-3xl bg-slate-50 p-2 rounded-lg border border-slate-100">${proj.icon}</div>
+                    <div>
+                        <h4 class="font-bold text-loucovice-blue">${proj.title}</h4>
+                        <p class="text-xs text-slate-500 mt-1">${proj.shortDesc}</p>
+                    </div>
+                `;
+                listEl.appendChild(card);
+            });
+        }
+
+        function showProjectDetails(id) {
+            currentActiveProject = id;
+            const proj = projects.find(p => p.id === id);
+            
+            // Update active state in list visually
+            document.querySelectorAll('.project-card').forEach((card, index) => {
+                card.classList.toggle('active', projects[index].id === id);
+            });
+
+            const detailEl = document.getElementById('project-detail');
+            
+            // Fade effect
+            detailEl.style.opacity = 0;
+            setTimeout(() => {
+                detailEl.innerHTML = `
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="text-5xl bg-blue-50 p-4 rounded-xl border border-blue-100 text-loucovice-blue">${proj.icon}</div>
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Projektový list</span>
+                            <h3 class="text-2xl font-bold text-loucovice-blue">${proj.title}</h3>
+                        </div>
+                    </div>
+                    
+                    <p class="text-slate-600 mb-8 leading-relaxed">${proj.fullDesc}</p>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                            <span class="block text-xs text-slate-500 uppercase mb-1">Odhadovaný rozpočet</span>
+                            <span class="text-lg font-bold text-slate-800">${proj.budget}</span>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                            <span class="block text-xs text-slate-500 uppercase mb-1">Stav přípravy</span>
+                            <span class="text-lg font-bold text-slate-800">${proj.status}</span>
+                        </div>
+                        <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-100 sm:col-span-2">
+                            <span class="block text-xs text-emerald-600 uppercase mb-1">Doporučená dotační synergie</span>
+                            <span class="text-base font-bold text-emerald-800">${proj.subsidyMatch}</span>
+                        </div>
+                    </div>
+                `;
+                detailEl.style.opacity = 1;
+            }, 150);
+        }
+
+        // --- RENDER SUBSIDY TABLE ---
+        function renderSubsidyTable(filter) {
+            const tbody = document.getElementById('subsidy-tbody');
+            tbody.innerHTML = '';
+            
+            let filtered = subsidies;
+            if (filter !== 'all') {
+                filtered = subsidies.filter(s => s.status === filter);
+            }
+
+            filtered.forEach(sub => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b hover:bg-slate-50 transition-colors";
+                tr.innerHTML = `
+                    <td class="p-4 whitespace-nowrap"><span class="mr-2">${sub.statusIcon}</span> ${sub.statusText}</td>
+                    <td class="p-4 font-medium">${sub.project}</td>
+                    <td class="p-4"><span class="px-2 py-1 bg-blue-50 text-blue-800 rounded text-xs border border-blue-100">${sub.program}</span></td>
+                    <td class="p-4">${sub.support}</td>
+                    <td class="p-4 text-slate-500">${sub.deadline}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterTable(filter) {
+            renderSubsidyTable(filter);
+        }
+
+        // --- INIT CHARTS (Chart.js) ---
+        function initCharts() {
+            // Chart 1: Bar Chart (Investments)
+            const ctxInvest = document.getElementById('investChart').getContext('2d');
+            new Chart(ctxInvest, {
+                type: 'bar',
+                data: {
+                    labels: ['2025', '2026', '2027', '2028', '2029', '2030'],
+                    datasets: [
+                        {
+                            label: 'Očekávané dotace (mil. Kč)',
+                            data: [15, 45, 60, 40, 20, 10],
+                            backgroundColor: '#047857',
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'Spoluúčast obce (mil. Kč)',
+                            data: [5, 15, 20, 15, 5, 2],
+                            backgroundColor: '#1e3a8a',
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true, grid: { display: false } },
+                        y: { stacked: true, border: { display: false } }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y + ' mil. Kč';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Chart 2: Doughnut Chart (Budget Allocation)
+            const ctxBudget = document.getElementById('budgetChart').getContext('2d');
+            new Chart(ctxBudget, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Brownfieldy a území', 'Technická infrastruktura', 'Cestovní ruch a cyklo', 'Zelená energetika'],
+                    datasets: [{
+                        data: [120, 45, 35, 23],
+                        backgroundColor: [
+                            '#1e3a8a', // Blue
+                            '#64748b', // Slate
+                            '#ea580c', // Orange
+                            '#047857'  // Green
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: { position: 'right' }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
