@@ -48,8 +48,8 @@
             max-width: 800px;
             margin-left: auto;
             margin-right: auto;
-            height: clamp(260px, 34vw, 380px);
-            min-height: 240px;
+            height: 350px;
+            max-height: 400px;
             overflow: hidden;
         }
 
@@ -60,10 +60,15 @@
             height: 100% !important;
         }
 
-        @media (max-width: 767px) {
+        @media (max-width: 768px) {
             .chart-container {
-                height: 240px;
-                min-height: 220px;
+                height: 280px;
+                max-height: 300px;
+            }
+
+            #budgetChart-wrapper {
+                height: 320px;
+                max-height: 320px;
             }
         }
 
@@ -189,6 +194,16 @@
             border-bottom: 1px solid #e2e8f0;
             font-size: 0.75rem;
             color: #64748b;
+            position: sticky;
+            top: 0;
+            z-index: 30;
+        }
+
+        @media (max-width: 768px) {
+            #uvod {
+                padding-top: 3rem;
+                scroll-margin-top: 3rem;
+            }
         }
 
         /* Mobile nav toggle */
@@ -257,8 +272,8 @@
     <nav id="sidebar" class="w-full md:w-64 bg-white shadow-xl flex flex-col z-20 md:h-full">
         <div class="p-6 bg-loucovice-blue text-white text-center relative">
             <div class="text-4xl mb-2">🌊🌲</div>
-            <h1 class="text-xl font-bold tracking-tight">LOUČOVICE</h1>
-            <p class="text-xs text-blue-200 mt-1 uppercase tracking-wider">Strategický Portál 2.0</p>
+            <h1 id="portal-title" class="text-xl font-bold tracking-tight">LOUČOVICE</h1>
+            <p id="portal-subtitle" class="text-xs text-blue-200 mt-1 uppercase tracking-wider">Strategický Portál 2.0</p>
             <!-- Mobile toggle -->
             <button id="mobile-nav-toggle" onclick="toggleMobileNav()"
                 aria-label="Toggle navigation"
@@ -300,7 +315,7 @@
 
         <!-- Top bar -->
         <div id="top-bar">
-            <span>📋 SR-LOU-2026-V2 &mdash; Důvěrný strategický dokument</span>
+            <span id="top-bar-doc">📋 SR-LOU-2026-V2 &mdash; Důvěrný strategický dokument</span>
             <span id="top-bar-date"></span>
         </div>
         
@@ -344,9 +359,9 @@
                     <p class="text-slate-600 max-w-3xl">Tato sekce vizualizuje finanční trajektorii strategických záměrů a definuje silné a slabé stránky obce. Grafy představují odhadované investiční náklady a dotační krytí na základě hloubkové analýzy dotačních titulů (IROP, OPŽP, SFPI).</p>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20 overflow-hidden">
                     <!-- Charts -->
-                    <div class="space-y-8">
+                    <div class="space-y-8 pb-4 overflow-hidden">
                         <div class="bg-slate-50 p-6 rounded-xl border border-slate-100 shadow-sm">
                             <h3 class="text-lg font-bold text-slate-800 mb-2 text-center">Plánované investice vs. Očekávané dotace (v mil. Kč)</h3>
                             <div class="chart-container">
@@ -355,7 +370,7 @@
                         </div>
                         <div class="bg-slate-50 p-6 rounded-xl border border-slate-100 shadow-sm">
                             <h3 class="text-lg font-bold text-slate-800 mb-2 text-center">Rozložení dotačního portfolia</h3>
-                            <div class="chart-container">
+                            <div id="budgetChart-wrapper" class="chart-container">
                                 <canvas id="budgetChart"></canvas>
                             </div>
                         </div>
@@ -613,67 +628,73 @@
         }
 
         // --- DATA STATE ---
-        const projects = [
-            {
-                id: 'dvorecna',
-                title: 'Obytná zóna Dvorečná',
-                icon: '&#127960;&#65039;',
-                shortDesc: 'Výstavba infrastruktury pro nové rodinné a dostupné nájemní bydlení.',
-                fullDesc: 'Reakce na úbytek obyvatel. V rámci změny ÚP č. 6 je oblast Dvorečná vyčleněna pro rezidenční zástavbu. Obec musí zajistit základní technickou infrastrukturu (voda, kanalizace, komunikace). Následně zde mohou vzniknout rodinné domy a objekt pro dostupné nájemní bydlení s podporou SFPI.',
-                budget: '45 mil. Kč',
-                subsidyMatch: 'SFPI - Technická infrastruktura / Dostupné nájemní bydlení',
-                status: 'Ve fázi studie'
-            },
-            {
-                id: 'brownfield',
-                title: 'Brownfield Sv. Prokop',
-                icon: '&#127959;&#65039;',
-                shortDesc: 'Revitalizace bývalého průmyslového areálu na komerčně-rekreační zónu.',
-                fullDesc: 'Zásadní strategický projekt pro odklon od těžkého průmyslu. Areál historické papírny bude částečně zbourán a sanován, historicky cenné budovy zachovány. Cílem je vytvořit zázemí pro drobnou komerci, služby spojené s turismem ("Divoká voda") a veřejný prostor.',
-                budget: '120 mil. Kč',
-                subsidyMatch: 'NPO - Revitalizace brownfieldů / OP TAK',
-                status: 'Příprava demolice'
-            },
-            {
-                id: 'cyklo',
-                title: 'Cyklostezka Loučovice - Vyšší Brod',
-                icon: '&#128690;',
-                shortDesc: 'Bezpečné propojení obcí podél Vltavy mimo hlavní tah.',
-                fullDesc: 'Klíčový projekt pro rozvoj udržitelného turismu a zvýšení bezpečnosti obyvatel. Úsek podél řeky Vltavy napojí Loučovice na páteřní šumavskou cyklosíť a uleví frekventované silnici II/163.',
-                budget: '35 mil. Kč',
-                subsidyMatch: 'SFDI - Cyklistická infrastruktura / IROP',
-                status: 'Územní rozhodnutí'
-            },
-            {
-                id: 'energetika',
-                title: 'Chytrá energetika & FVE',
-                icon: '&#128267;',
-                shortDesc: 'Fotovoltaika na budově OÚ a základní školy, příprava sdílení.',
-                fullDesc: 'Snížení provozních nákladů veřejných budov. Na střechách obecního úřadu a ZŠ budou instalovány FVE panely s bateriovým úložištěm. Projekt počítá s budoucím založením energetického společenství pro sdílení přebytků v obci.',
-                budget: '8 mil. Kč',
-                subsidyMatch: 'Modernizační fond (RES+) / OP ŽP',
-                status: 'Energetický posudek'
-            },
-            {
-                id: 'prostoru',
-                title: 'Obnova veřejných prostranství',
-                icon: '&#127795;',
-                shortDesc: 'Zelená infrastruktura, výsadba a úprava centra obce.',
-                fullDesc: 'Zlepšení mikroklimatu a estetiky centra obce. Výsadba stromořadí, budování propustných povrchů pro zadržování vody v krajině a instalace nového, energeticky úsporného veřejného osvětlení.',
-                budget: '15 mil. Kč',
-                subsidyMatch: 'IROP - Zelená infrastruktura',
-                status: 'Plánování'
-            }
-        ];
+        let projects = [];
+        let subsidies = [];
+        let chartsConfig = null;
+        let currentActiveProject = null;
+        window.chartInstances = [];
 
-        const subsidies = [
-            { id: 1, status: 'active', statusIcon: '&#128994;', statusText: 'Aktivní', project: 'Obytná zóna Dvorečná', program: 'SFPI - Dostupné nájemní bydlení', support: 'Dotace 25 % + Zvýhodněný úvěr', deadline: 'Průběžná do vyčerpání' },
-            { id: 2, status: 'prep', statusIcon: '&#128993;', statusText: 'Připravuje se', project: 'Brownfield Sv. Prokop', program: 'NPO / MMR (Brownfieldy)', support: 'Až 60 %', deadline: 'Výzva očekávána Q1 2026' },
-            { id: 3, status: 'active', statusIcon: '&#128994;', statusText: 'Aktivní', project: 'Cyklostezka V. Brod', program: 'IROP 2021-2027 (Čistá mobilita)', support: '85 %', deadline: 'Otevřená kolová výzva' },
-            { id: 4, status: 'active', statusIcon: '&#128994;', statusText: 'Aktivní', project: 'FVE na OÚ a školu', program: 'Modernizační fond (RES+)', support: 'Až 75 %', deadline: 'Průběžná do 10/2026' },
-            { id: 5, status: 'closed', statusIcon: '&#128308;', statusText: 'Uzavřeno', project: 'Obnova prostranství', program: 'IROP (Zelená infrastruktura)', support: '85 %', deadline: 'Další kolo 2027' },
-            { id: 6, status: 'prep', statusIcon: '&#128993;', statusText: 'Připravuje se', project: 'Rekonstrukce budov obce', program: 'SFPI - Živel 3 / Úsporné budovy', support: 'Kombinace', deadline: 'Metodika v přípravě' }
-        ];
+        const fallbackConfig = {
+            projects: [],
+            subsidies: [],
+            charts: {
+                invest: {
+                    labels: ['2025', '2026', '2027', '2028', '2029', '2030'],
+                    grants: [15, 45, 60, 40, 20, 10],
+                    cofinancing: [5, 15, 20, 15, 5, 2]
+                },
+                budget: {
+                    labels: ['Brownfieldy a území', 'Technická infrastruktura', 'Cestovní ruch a cyklo', 'Zelená energetika'],
+                    data: [120, 45, 35, 23]
+                }
+            },
+            meta: {
+                title: 'Portál obce Loučovice',
+                subtitle: 'Strategický Portál 2.0',
+                period: '2025-2030',
+                docCode: 'SR-LOU-2026-V2'
+            }
+        };
+
+        async function loadConfig() {
+            try {
+                const response = await fetch('./data/config.json');
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Config loading failed, fallback will be used:', error);
+                return fallbackConfig;
+            }
+        }
+
+        function applyMeta(meta) {
+            if (!meta) {
+                return;
+            }
+
+            const title = meta.title || 'Portál obce Loučovice';
+            const subtitle = meta.subtitle || 'Strategický Portál 2.0';
+            const period = meta.period || '';
+            const docCode = meta.docCode || 'SR-LOU-2026-V2';
+
+            document.title = period ? title + ' ' + period : title;
+
+            const titleEl = document.getElementById('portal-title');
+            const subtitleEl = document.getElementById('portal-subtitle');
+            const topBarDocEl = document.getElementById('top-bar-doc');
+
+            if (titleEl) {
+                titleEl.textContent = title.toUpperCase().replace('PORTÁL OBCE ', '');
+            }
+            if (subtitleEl) {
+                subtitleEl.textContent = subtitle;
+            }
+            if (topBarDocEl) {
+                topBarDocEl.textContent = '📋 ' + docCode + ' — Důvěrný strategický dokument';
+            }
+        }
 
         function normalizeSubsidyRecord(record, index) {
             const status = (record.status || record.stav || 'prep').toLowerCase();
@@ -691,22 +712,30 @@
             };
         }
 
-        let currentActiveProject = projects[0].id;
-
         // --- INIT FUNCTIONS ---
-        window.onload = function() {
-            safelyInitCharts();
-            renderProjectList();
-            showProjectDetails(currentActiveProject);
-            renderSubsidyTable('all');
+        window.onload = async function() {
+            const config = await loadConfig();
+
+            applyMeta(config.meta);
+            projects = Array.isArray(config.projects) ? config.projects : [];
+            subsidies = Array.isArray(config.subsidies) ? config.subsidies : [];
+            chartsConfig = config.charts || fallbackConfig.charts;
+            currentActiveProject = projects.length ? projects[0].id : null;
+
+            safelyInitCharts(chartsConfig);
+            renderProjectList(projects);
+            if (currentActiveProject) {
+                showProjectDetails(currentActiveProject, projects);
+            }
+            renderSubsidyTable('all', subsidies);
             setupScrollSpy();
             initFadeIn();
             initBackTop();
         };
 
-        function safelyInitCharts() {
+        function safelyInitCharts(config) {
             try {
-                initCharts();
+                initCharts(config);
             } catch (error) {
                 console.error('Charts initialization failed:', error);
             }
@@ -742,14 +771,20 @@
         }
 
         // --- RENDER PROJECTS ---
-        function renderProjectList() {
+        function renderProjectList(projectList) {
+            const data = Array.isArray(projectList) ? projectList : projects;
             const listEl = document.getElementById('project-list');
             listEl.innerHTML = '';
+
+            if (!data.length) {
+                listEl.innerHTML = '<div class="bg-white p-4 rounded-lg border border-slate-200 text-slate-500 text-sm">Projektová data nejsou dostupná.</div>';
+                return;
+            }
             
-            projects.forEach(proj => {
+            data.forEach(proj => {
                 const card = document.createElement('div');
                 card.className = `project-card bg-white p-4 rounded-lg shadow-sm flex items-start gap-4 ${proj.id === currentActiveProject ? 'active' : ''}`;
-                card.onclick = () => showProjectDetails(proj.id);
+                card.onclick = () => showProjectDetails(proj.id, data);
                 
                 card.innerHTML = `
                     <div class="text-3xl bg-slate-50 p-2 rounded-lg border border-slate-100">${proj.icon}</div>
@@ -762,13 +797,18 @@
             });
         }
 
-        function showProjectDetails(id) {
+        function showProjectDetails(id, projectList) {
+            const data = Array.isArray(projectList) ? projectList : projects;
             currentActiveProject = id;
-            const proj = projects.find(p => p.id === id);
+            const proj = data.find(p => p.id === id);
+
+            if (!proj) {
+                return;
+            }
             
             // Update active state in list visually
             document.querySelectorAll('.project-card').forEach((card, index) => {
-                card.classList.toggle('active', projects[index].id === id);
+                card.classList.toggle('active', !!data[index] && data[index].id === id);
             });
 
             const detailEl = document.getElementById('project-detail');
@@ -807,7 +847,8 @@
         }
 
         // --- RENDER SUBSIDY TABLE ---
-        function renderSubsidyTable(filter) {
+        function renderSubsidyTable(filter, subsidyList) {
+            const records = Array.isArray(subsidyList) ? subsidyList : subsidies;
             const tbody = document.getElementById('subsidy-tbody');
             if (!tbody) {
                 return;
@@ -816,7 +857,7 @@
             tbody.innerHTML = '';
 
             const normalizedFilter = ['all', 'active', 'prep'].includes(filter) ? filter : 'all';
-            const normalizedSubsidies = subsidies.map(normalizeSubsidyRecord);
+            const normalizedSubsidies = records.map(normalizeSubsidyRecord);
             
             let filtered = normalizedSubsidies;
             if (normalizedFilter !== 'all') {
@@ -846,14 +887,31 @@
 
         function filterTable(filter) {
             const normalizedFilter = ['all', 'active', 'prep'].includes(filter) ? filter : 'all';
-            renderSubsidyTable(normalizedFilter);
+            renderSubsidyTable(normalizedFilter, subsidies);
+        }
+
+        function destroyCharts() {
+            if (!Array.isArray(window.chartInstances)) {
+                window.chartInstances = [];
+            }
+            window.chartInstances.forEach(function(chart) {
+                chart.destroy();
+            });
+            window.chartInstances = [];
         }
 
         // --- INIT CHARTS (Chart.js) ---
-        function initCharts() {
+        function initCharts(config) {
             if (typeof Chart === 'undefined') {
                 throw new Error('Chart.js is not available');
             }
+
+            const chartData = config || fallbackConfig.charts;
+            const investData = chartData.invest || fallbackConfig.charts.invest;
+            const budgetData = chartData.budget || fallbackConfig.charts.budget;
+            const isMobile = window.innerWidth <= 768;
+
+            destroyCharts();
 
             const investCanvas = document.getElementById('investChart');
             const budgetCanvas = document.getElementById('budgetChart');
@@ -864,20 +922,20 @@
 
             // Chart 1: Bar Chart (Investments)
             const ctxInvest = investCanvas.getContext('2d');
-            new Chart(ctxInvest, {
+            window.chartInstances.push(new Chart(ctxInvest, {
                 type: 'bar',
                 data: {
-                    labels: ['2025', '2026', '2027', '2028', '2029', '2030'],
+                    labels: investData.labels || fallbackConfig.charts.invest.labels,
                     datasets: [
                         {
                             label: 'Očekávané dotace (mil. Kč)',
-                            data: [15, 45, 60, 40, 20, 10],
+                            data: investData.grants || fallbackConfig.charts.invest.grants,
                             backgroundColor: '#047857',
                             borderRadius: 4
                         },
                         {
                             label: 'Spoluúčast obce (mil. Kč)',
-                            data: [5, 15, 20, 15, 5, 2],
+                            data: investData.cofinancing || fallbackConfig.charts.invest.cofinancing,
                             backgroundColor: '#1e3a8a',
                             borderRadius: 4
                         }
@@ -901,16 +959,16 @@
                         }
                     }
                 }
-            });
+            }));
 
             // Chart 2: Doughnut Chart (Budget Allocation)
             const ctxBudget = budgetCanvas.getContext('2d');
-            new Chart(ctxBudget, {
+            window.chartInstances.push(new Chart(ctxBudget, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Brownfieldy a území', 'Technická infrastruktura', 'Cestovní ruch a cyklo', 'Zelená energetika'],
+                    labels: budgetData.labels || fallbackConfig.charts.budget.labels,
                     datasets: [{
-                        data: [120, 45, 35, 23],
+                        data: budgetData.data || fallbackConfig.charts.budget.data,
                         backgroundColor: [
                             '#1e3a8a', // Blue
                             '#64748b', // Slate
@@ -926,11 +984,25 @@
                     maintainAspectRatio: false,
                     cutout: '65%',
                     plugins: {
-                        legend: { position: 'right' }
+                        legend: {
+                            position: isMobile ? 'bottom' : 'right',
+                            labels: {
+                                boxWidth: isMobile ? 12 : 16,
+                                padding: isMobile ? 8 : 16,
+                                font: { size: isMobile ? 10 : 12 }
+                            }
+                        }
                     }
                 }
-            });
+            }));
         }
+
+        // Re-render charts on resize for mobile/desktop legend changes
+        window.addEventListener('resize', function() {
+            if (window.chartInstances && window.chartInstances.length) {
+                safelyInitCharts(chartsConfig);
+            }
+        });
     </script>
 </body>
 </html>

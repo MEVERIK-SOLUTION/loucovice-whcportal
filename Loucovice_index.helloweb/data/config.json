@@ -1,0 +1,134 @@
+{
+  "meta": {
+    "title": "Portál obce Loučovice",
+    "subtitle": "Strategický Portál 2.0",
+    "period": "2025-2030",
+    "docCode": "SR-LOU-2026-V2",
+    "year": 2026
+  },
+  "projects": [
+    {
+      "id": "dvorecna",
+      "title": "Obytná zóna Dvorečná",
+      "icon": "🏘️",
+      "shortDesc": "Výstavba infrastruktury pro nové rodinné a dostupné nájemní bydlení.",
+      "fullDesc": "Reakce na úbytek obyvatel. V rámci změny ÚP č. 6 je oblast Dvorečná vyčleněna pro rezidenční zástavbu. Obec musí zajistit základní technickou infrastrukturu (voda, kanalizace, komunikace). Následně zde mohou vzniknout rodinné domy a objekt pro dostupné nájemní bydlení s podporou SFPI.",
+      "budget": "45 mil. Kč",
+      "subsidyMatch": "SFPI - Technická infrastruktura / Dostupné nájemní bydlení",
+      "status": "Ve fázi studie"
+    },
+    {
+      "id": "brownfield",
+      "title": "Brownfield Sv. Prokop",
+      "icon": "🏗️",
+      "shortDesc": "Revitalizace bývalého průmyslového areálu na komerčně-rekreační zónu.",
+      "fullDesc": "Zásadní strategický projekt pro odklon od těžkého průmyslu. Areál historické papírny bude částečně zbourán a sanován, historicky cenné budovy zachovány. Cílem je vytvořit zázemí pro drobnou komerci, služby spojené s turismem (Divoká voda) a veřejný prostor.",
+      "budget": "120 mil. Kč",
+      "subsidyMatch": "NPO - Revitalizace brownfieldů / OP TAK",
+      "status": "Příprava demolice"
+    },
+    {
+      "id": "cyklo",
+      "title": "Cyklostezka Loučovice - Vyšší Brod",
+      "icon": "🚲",
+      "shortDesc": "Bezpečné propojení obcí podél Vltavy mimo hlavní tah.",
+      "fullDesc": "Klíčový projekt pro rozvoj udržitelného turismu a zvýšení bezpečnosti obyvatel. Úsek podél řeky Vltavy napojí Loučovice na páteřní šumavskou cyklosíť a uleví frekventované silnici II/163.",
+      "budget": "35 mil. Kč",
+      "subsidyMatch": "SFDI - Cyklistická infrastruktura / IROP",
+      "status": "Územní rozhodnutí"
+    },
+    {
+      "id": "energetika",
+      "title": "Chytrá energetika a FVE",
+      "icon": "🔋",
+      "shortDesc": "Fotovoltaika na budově OÚ a základní školy, příprava sdílení.",
+      "fullDesc": "Snížení provozních nákladů veřejných budov. Na střechách obecního úřadu a ZŠ budou instalovány FVE panely s bateriovým úložištěm. Projekt počítá s budoucím založením energetického společenství pro sdílení přebytků v obci.",
+      "budget": "8 mil. Kč",
+      "subsidyMatch": "Modernizační fond (RES+) / OP ŽP",
+      "status": "Energetický posudek"
+    },
+    {
+      "id": "prostoru",
+      "title": "Obnova veřejných prostranství",
+      "icon": "🌳",
+      "shortDesc": "Zelená infrastruktura, výsadba a úprava centra obce.",
+      "fullDesc": "Zlepšení mikroklimatu a estetiky centra obce. Výsadba stromořadí, budování propustných povrchů pro zadržování vody v krajině a instalace nového, energeticky úsporného veřejného osvětlení.",
+      "budget": "15 mil. Kč",
+      "subsidyMatch": "IROP - Zelená infrastruktura",
+      "status": "Plánování"
+    }
+  ],
+  "subsidies": [
+    {
+      "id": 1,
+      "status": "active",
+      "statusIcon": "🟢",
+      "statusText": "Aktivní",
+      "project": "Obytná zóna Dvorečná",
+      "program": "SFPI - Dostupné nájemní bydlení",
+      "support": "Dotace 25 % + Zvýhodněný úvěr",
+      "deadline": "Průběžná do vyčerpání"
+    },
+    {
+      "id": 2,
+      "status": "prep",
+      "statusIcon": "🟡",
+      "statusText": "Připravuje se",
+      "project": "Brownfield Sv. Prokop",
+      "program": "NPO / MMR (Brownfieldy)",
+      "support": "Až 60 %",
+      "deadline": "Výzva očekávána Q1 2026"
+    },
+    {
+      "id": 3,
+      "status": "active",
+      "statusIcon": "🟢",
+      "statusText": "Aktivní",
+      "project": "Cyklostezka V. Brod",
+      "program": "IROP 2021-2027 (Čistá mobilita)",
+      "support": "85 %",
+      "deadline": "Otevřená kolová výzva"
+    },
+    {
+      "id": 4,
+      "status": "active",
+      "statusIcon": "🟢",
+      "statusText": "Aktivní",
+      "project": "FVE na OÚ a školu",
+      "program": "Modernizační fond (RES+)",
+      "support": "Až 75 %",
+      "deadline": "Průběžná do 10/2026"
+    },
+    {
+      "id": 5,
+      "status": "closed",
+      "statusIcon": "🔴",
+      "statusText": "Uzavřeno",
+      "project": "Obnova prostranství",
+      "program": "IROP (Zelená infrastruktura)",
+      "support": "85 %",
+      "deadline": "Další kolo 2027"
+    },
+    {
+      "id": 6,
+      "status": "prep",
+      "statusIcon": "🟡",
+      "statusText": "Připravuje se",
+      "project": "Rekonstrukce budov obce",
+      "program": "SFPI - Živel 3 / Úsporné budovy",
+      "support": "Kombinace",
+      "deadline": "Metodika v přípravě"
+    }
+  ],
+  "charts": {
+    "invest": {
+      "labels": ["2025", "2026", "2027", "2028", "2029", "2030"],
+      "grants": [15, 45, 60, 40, 20, 10],
+      "cofinancing": [5, 15, 20, 15, 5, 2]
+    },
+    "budget": {
+      "labels": ["Brownfieldy a území", "Technická infrastruktura", "Cestovní ruch a cyklo", "Zelená energetika"],
+      "data": [120, 45, 35, 23]
+    }
+  }
+}

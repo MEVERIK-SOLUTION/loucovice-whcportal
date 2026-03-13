@@ -3,6 +3,7 @@
   "routes": [
     { "src": "/style.css", "dest": "/Loucovice_index.helloweb/style.css" },
     { "src": "/script.js", "dest": "/Loucovice_index.helloweb/script.js" },
+    { "src": "/data/config.json", "dest": "/Loucovice_index.helloweb/data/config.json" },
     { "src": "/", "dest": "/Loucovice_index.helloweb/index.html" },
     { "src": "/(.*)", "dest": "/Loucovice_index.helloweb/$1" }
   ]
