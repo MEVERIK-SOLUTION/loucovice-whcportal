@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="cs" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katalog poskytovatelů dotací a případové studie</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#0f172a',
+                            light: '#f8fafc',
+                            sfpi: '#0284c7', // Light Blue
+                            irop: '#e11d48', // Rose
+                            sfzp: '#16a34a'  // Green
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        heading: ['Merriweather', 'serif'] // Serif for more editorial/presentation feel
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700;900&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            color: #334155;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Merriweather', serif;
+        }
+
+        /* Card Hover Effects */
+        .provider-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-bottom-width: 4px;
+            border-bottom-color: transparent;
+        }
+        
+        .provider-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .provider-btn.active-sfpi { border-bottom-color: #0284c7; background-color: #f0f9ff; }
+        .provider-btn.active-irop { border-bottom-color: #e11d48; background-color: #fff1f2; }
+        .provider-btn.active-sfzp { border-bottom-color: #16a34a; background-color: #f0fdf4; }
+
+        /* Content Fade */
+        .fade-content {
+            animation: fadeIn 0.4s ease-in-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cashflow diagram styling */
+        .cashflow-step {
+            position: relative;
+        }
+        .cashflow-step:not(:last-child)::after {
+            content: '➔';
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #cbd5e1;
+            font-size: 1.5rem;
+        }
+        @media (max-width: 768px) {
+            .cashflow-step:not(:last-child)::after {
+                content: '⬇';
+                right: 50%;
+                top: auto;
+                bottom: -25px;
+                transform: translateX(50%);
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. HTML/CSS/Unicode only. -->
+
+    <!-- Back Navigation -->
+    <div class="bg-brand-dark border-b border-slate-700 px-4 py-2">
+        <div class="max-w-7xl mx-auto flex items-center gap-4">
+            <a href="/" class="inline-flex items-center gap-2 text-blue-300 hover:text-white text-sm font-medium transition-colors">
+                &#8592; Zpět na portál Loučovice
+            </a>
+            <span class="text-slate-600">|</span>
+            <a href="/dotace" class="inline-flex items-center gap-2 text-blue-300 hover:text-white text-sm font-medium transition-colors">
+                &#128200; Finanční kompas
+            </a>
+        </div>
+    </div>
+
+    <!-- Header / Hero Section -->
+    <header class="bg-brand-dark text-white pt-16 pb-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <!-- Abstract CSS Background pattern -->
+        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 24px 24px;"></div>
+        
+        <div class="max-w-7xl mx-auto relative z-10 text-center">
+            <div class="inline-block px-4 py-1.5 rounded-full bg-slate-800 border border-slate-700 text-xs font-bold uppercase tracking-widest text-slate-300 mb-6 shadow-sm">
+                Edukační prezentace | Obec Loučovice
+            </div>
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-black mb-6 leading-tight">
+                Anatomie <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">Dotací</span>
+            </h1>
+            <p class="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
+                Pochopení principů financování je klíčem k úspěšné realizaci projektů. Zjistěte detailně, jak fungují toky peněz, co obnáší pravidla jednotlivých poskytovatelů a inspirujte se reálnými příklady z praxe jiných obcí.
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Application Area -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-20 w-full mb-20">
+        
+        <!-- Interactive Tabs -->
+        <div class="flex flex-nowrap overflow-x-auto gap-4 pb-4 mb-8 justify-start md:justify-center snap-x" style="-ms-overflow-style: none; scrollbar-width: none;">
+            <button onclick="loadProvider('sfpi')" id="tab-sfpi" class="provider-btn flex-shrink-0 snap-center bg-white px-6 py-4 rounded-xl shadow-lg border border-slate-200 flex items-center gap-4 min-w-[280px]">
+                <div class="w-12 h-12 rounded-full bg-sky-100 flex items-center justify-center text-brand-sfpi text-2xl border border-sky-200 shadow-inner">&#127970;</div>
+                <div class="text-left">
+                    <div class="font-bold text-slate-900 text-lg">SFPI</div>
+                    <div class="text-xs text-slate-500 font-sans uppercase tracking-wide">Bydlení a rozvoj</div>
+                </div>
+            </button>
+
+            <button onclick="loadProvider('irop')" id="tab-irop" class="provider-btn flex-shrink-0 snap-center bg-white px-6 py-4 rounded-xl shadow-lg border border-slate-200 flex items-center gap-4 min-w-[280px]">
+                <div class="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center text-brand-irop text-2xl border border-rose-200 shadow-inner">&#128640;</div>
+                <div class="text-left">
+                    <div class="font-bold text-slate-900 text-lg">IROP (MMR)</div>
+                    <div class="text-xs text-slate-500 font-sans uppercase tracking-wide">Infrastruktura</div>
+                </div>
+            </button>
+
+            <button onclick="loadProvider('sfzp')" id="tab-sfzp" class="provider-btn flex-shrink-0 snap-center bg-white px-6 py-4 rounded-xl shadow-lg border border-slate-200 flex items-center gap-4 min-w-[280px]">
+                <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-brand-sfzp text-2xl border border-green-200 shadow-inner">&#127795;</div>
+                <div class="text-left">
+                    <div class="font-bold text-slate-900 text-lg">SFŽP</div>
+                    <div class="text-xs text-slate-500 font-sans uppercase tracking-wide">Životní prostředí</div>
+                </div>
+            </button>
+        </div>
+
+        <!-- Dynamic Content Container -->
+        <div id="content-display" class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden min-h-[600px]">
+            <!-- Content injected here via JS -->
+        </div>
+
+    </main>
+
+    <footer class="bg-slate-900 py-10 text-center border-t border-slate-800 text-slate-400">
+        <p class="font-sans text-sm">Zpracováno pro strategické plánování obce Loučovice. Metodika: <strong>WHC s.r.o.</strong> &copy; 2026</p>
+    </footer>
+
+    <!-- Data and Application Logic -->
+    <script>
+        const database = {
+            'sfpi': {
+                id: 'sfpi',
+                themeColor: 'sky',
+                hex: '#0284c7',
+                fullName: 'Státní fond podpory investic',
+                icon: '&#127970;',
+                intro: 'Specializuje se na podporu rozvoje bydlení a revitalizaci obcí. Na rozdíl od klasických strukturálních fondů EU velmi často využívá <strong>návratné finanční nástroje</strong> (zvýhodněné úvěry) kombinované s dotační složkou. Je velmi flexibilní z hlediska cash-flow obce.',
+                programTitle: 'Dostupné nájemní bydlení',
+                programContext: 'Ideální pro projekt: Obytná zóna Dvorečná',
+                mechanisms: [
+                    {
+                        title: 'Míra a forma podpory',
+                        icon: '&#128176;',
+                        text: 'Až <strong class="text-sky-700">25 % formou přímé dotace</strong> a až <strong class="text-sky-700">90 % zbylých nákladů formou zvýhodněného úvěru</strong> (splatnost až 30 let, úrok garantován na minimální hranici EU, často 1-2 %).'
+                    },
+                    {
+                        title: 'Pravidla pro nájemníky',
+                        icon: '&#128106;',
+                        text: 'Byty nelze pronajímat komerčně za tržní ceny. Jsou určeny pro tzv. cílové skupiny (mladé rodiny, senioři, učitelé, hasiči, lékaři) za snížené, nákladové nájemné.'
+                    }
+                ],
+                cashflowType: 'Průběžné financování (Ex-ante kombinace)',
+                cashflowDesc: 'Obrovská výhoda programu. Obec nemusí mít celou částku na účtu. Fond uvolňuje prostředky (čerpá se úvěr i dotace) průběžně na základě vystavených a fondem schválených faktur od stavební firmy. Obec tak nezatěžuje své aktuální cash-flow.',
+                cashflowSteps: ['Podpis smlouvy se SFPI', 'Stavba běží (fakturace)', 'SFPI proplácí faktury napřímo/obci', 'Kolaudace a pronájem', 'Obec splácí úvěr z vybraného nájmu'],
+                caseStudy: {
+                    title: 'Město Vimperk: Z ruiny dostupné bydlení',
+                    cost: '85 milionů Kč',
+                    story: 'Město Vimperk se rozhodlo přestavět zdevastovanou bývalou nemocnici nedaleko centra na 24 moderních dostupných bytů. Rozpočet 85 mil. Kč byl pro město nedosažitelný.',
+                    solution: 'Díky SFPI získali 21 mil. Kč nenávratnou dotaci a 58 mil. Kč jako úvěr se sazbou 1.5% na 30 let. Ze svého platili jen 6 mil. Kč. Odklad splátek úvěru nastavili na dobu stavby. Úvěr začali splácet až v momentě, kdy se do bytů nastěhovali nájemníci (učitelé, policisté). <strong>Splátka úvěru je 100% pokryta z výběru nájemného – projekt město nestojí ani korunu z běžného rozpočtu.</strong>'
+                }
+            },
+            'irop': {
+                id: 'irop',
+                themeColor: 'rose',
+                hex: '#e11d48',
+                fullName: 'Integrovaný regionální operační program (MMR)',
+                icon: '&#128640;',
+                intro: 'Evropský dotační gigant spravovaný Ministerstvem pro místní rozvoj. Zaměřuje se na tvrdou infrastrukturu (cyklostezky, hasičárny, školy, eGovernment). Nabízí extrémně vysokou míru nevratné dotace, ale vyžaduje striktní administrativu a silné finanční zdraví obce po dobu realizace.',
+                programTitle: 'Čistá a aktivní mobilita',
+                programContext: 'Ideální pro projekt: Cyklostezka Loučovice - Vyšší Brod',
+                mechanisms: [
+                    {
+                        title: 'Míra podpory',
+                        icon: '&#128200;',
+                        text: 'Standardně <strong class="text-rose-700">85 % z celkových způsobilých výdajů</strong> formou nenávratné dotace. Zbylých 15 % hradí obec. Pozor na tzv. nezpůsobilé výdaje (např. projektová dokumentace nad limit, slavnostní otevírání), ty hradí obec plně.'
+                    },
+                    {
+                        title: 'Přísná administrace a výběrová řízení',
+                        icon: '&#128193;',
+                        text: 'Zásadní je bezchybné provedení veřejné zakázky na zhotovitele. Jakékoliv pochybení v soutěži je sankcionováno tzv. korekcí (krácením) dotace.'
+                    }
+                ],
+                cashflowType: 'Zpětné proplácení (Striktní Ex-post)',
+                cashflowDesc: 'Klíčové úskalí! IROP vám nedá peníze dopředu. Obec musí projekt (nebo jeho předem domluvenou etapu) nejprve sama ze svého zaplatit stavební firmě. Teprve po uhrazení faktur zašle žádost o platbu na MMR. Proplacení trvá obvykle 2-4 měsíce.',
+                cashflowSteps: ['Stavba etapy z vlastních / z úvěru banky', 'Úhrada faktur zhotoviteli', 'Podání Žádosti o platbu (ŽoP) do systému', 'Administrativní kontrola na MMR (týdny)', 'Peníze dorazí na účet obce'],
+                caseStudy: {
+                    title: 'Město Kaplice: Fázování cyklostezky',
+                    cost: '42 milionů Kč',
+                    story: 'Město získalo příslib obrovské dotace 35 mil. Kč z IROP na výstavbu páteřní cyklostezky. V rozpočtu ale nemělo volných 42 milionů na "předfinancování" celé stavby pro ex-post režim IROPu.',
+                    solution: 'Strategie byla dvojí: 1. Stavbu rozdělili do 3 samostatně fakturovatelných etap (tzv. etapy v ŽoP). 2. U Národní rozvojové banky (NRB) si vzali <strong>krátkodobý překlenovací úvěr</strong> s úrokem blížícím se nule. Z úvěru zaplatili 1. etapu (14 mil. Kč). Odeslali žádost na IROP. Za 3 měsíce jim IROP poslal 11,9 mil. Kč dotace na účet. Tyto peníze rovnou použili na zaplacení 2. etapy. Tímto "rotováním" peněz zvládli projekt za 42 mil. Kč postavit s pouhými cca 15 mil. Kč vlastního/úvěrového cash-flow.'
+                }
+            },
+            'sfzp': {
+                id: 'sfzp',
+                themeColor: 'green',
+                hex: '#16a34a',
+                fullName: 'Státní fond životního prostředí (a Mod. fond)',
+                icon: '&#127795;',
+                intro: 'Fond řešící ekologickou transformaci. Nyní masivně distribuuje peníze z prodeje emisních povolenek (Modernizační fond). Je to hlavní zdroj financí pro úspory energií, fotovoltaiku, zateplování obecních budov a vodohospodářské stavby.',
+                programTitle: 'Modernizační fond (Program RES+)',
+                programContext: 'Ideální pro projekt: Chytrá energetika (FVE na OÚ a ZŠ)',
+                mechanisms: [
+                    {
+                        title: 'Míra podpory (Paušál)',
+                        icon: '&#128267;',
+                        text: 'Až <strong class="text-green-700">75 % celkových nákladů</strong>. Zajímavostí je, že podpora je často stanovena jako <strong>jednotkový paušál</strong> (např. přesná částka za instalovaný 1 kWp panelů a 1 kWh baterie). Nemusíte tak dokládat detailně každou položku rozpočtu.'
+                    },
+                    {
+                        title: 'Důraz na energetický posudek',
+                        icon: '&#128208;',
+                        text: 'Základem úspěchu není jen výkres, ale kvalitní Energetický posudek (PENB), který doloží skutečný ekologický přínos a úsporu CO2.'
+                    }
+                ],
+                cashflowType: 'Hybridní (Průběžné i Ex-post)',
+                cashflowDesc: 'SFŽP je v tomto ohledu přátelštější než IROP. Umožňuje podávat zálohové faktury nebo proplácet průběžně během realizace bez nutnosti platit vše ze svého. Záleží na konkrétní výzvě a velikosti projektu.',
+                cashflowSteps: ['Energetický posudek a podání žádosti', 'Realizace FVE dodavatelem', 'Průběžná fakturace na Fond', 'Dotace chodí rovnou obci/dodavateli', 'Monitorování úspor (5 let)'],
+                caseStudy: {
+                    title: 'Obec s 1 500 obyvateli: Zisková střecha',
+                    cost: '1,8 milionu Kč',
+                    story: 'Obec se potýkala s dramatickým nárůstem cen energií za provoz obecního úřadu a přilehlé základní školy. Rozhodli se pro instalaci fotovoltaické elektrárny (45 kWp) s menší baterií pro překrytí špiček.',
+                    solution: 'Z Modernizačního fondu získali paušální dotaci 1,3 mil. Kč. Obec investovala ze svého rozpočtu 500 tisíc Kč. Protože drtivou většinu vyrobené elektřiny spotřebuje škola a úřad během dne, klesly účty za elektřinu o 75%. Investovaných půl milionu korun se obci vrátilo na uspořených zálohách již za <strong>3 a půl roku</strong>. Nyní systém generuje obci čistý zisk v podobě neplacených energií v řádech stovek tisíc ročně a životnost panelů je přes 20 let.'
+                }
+            }
+        };
+
+        function loadProvider(id) {
+            // Update active states on buttons
+            document.querySelectorAll('.provider-btn').forEach(btn => {
+                btn.classList.remove('active-sfpi', 'active-irop', 'active-sfzp');
+            });
+            const activeBtn = document.getElementById(`tab-${id}`);
+            activeBtn.classList.add(`active-${id}`);
+
+            const data = database[id];
+            const container = document.getElementById('content-display');
+            
+            // Re-trigger animation by cloning and replacing
+            const newContent = document.createElement('div');
+            newContent.className = 'fade-content';
+
+            let stepsHtml = '';
+            data.cashflowSteps.forEach((step, index) => {
+                stepsHtml += `
+                    <div class="cashflow-step flex-1 text-center bg-white p-3 md:p-4 rounded-xl shadow-sm border border-slate-200 z-10 mx-2 my-2 md:my-0 relative">
+                        <div class="w-6 h-6 mx-auto rounded-full bg-${data.themeColor}-100 text-${data.themeColor}-700 text-xs font-bold flex items-center justify-center mb-2">${index + 1}</div>
+                        <p class="text-xs font-bold text-slate-700">${step}</p>
+                    </div>
+                `;
+            });
+
+            newContent.innerHTML = `
+                <!-- Top Header Panel -->
+                <div class="bg-${data.themeColor}-50 border-b border-${data.themeColor}-100 p-8 md:p-12 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 text-[15rem] opacity-5 -mt-10 -mr-10 select-none">${data.icon}</div>
+                    
+                    <div class="relative z-10 flex flex-col md:flex-row items-start gap-8">
+                        <div class="w-24 h-24 rounded-2xl bg-white shadow-md flex items-center justify-center text-5xl border border-${data.themeColor}-200 flex-shrink-0">
+                            ${data.icon}
+                        </div>
+                        <div>
+                            <h2 class="text-3xl md:text-4xl font-black text-slate-900 mb-4">${data.fullName}</h2>
+                            <p class="text-slate-700 text-lg leading-relaxed max-w-4xl">${data.intro}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content Body -->
+                <div class="p-8 md:p-12">
+                    
+                    <!-- Program Focus -->
+                    <div class="mb-12 border-l-4 border-${data.themeColor}-500 pl-5">
+                        <span class="text-sm font-bold text-${data.themeColor}-600 uppercase tracking-wider mb-1 block font-sans">Detailní rozbor nástroje</span>
+                        <h3 class="text-2xl md:text-3xl font-bold text-slate-900 mb-2">${data.programTitle}</h3>
+                        <p class="text-slate-500 font-sans italic">📌 ${data.programContext}</p>
+                    </div>
+
+                    <!-- Mechanisms & Rules Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                        ${data.mechanisms.map(mech => `
+                            <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <span class="text-2xl">${mech.icon}</span>
+                                    <h4 class="font-bold text-slate-800 text-xl font-sans">${mech.title}</h4>
+                                </div>
+                                <p class="text-slate-600 font-sans leading-relaxed">${mech.text}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <!-- Cashflow Section -->
+                    <div class="mb-12">
+                        <h3 class="text-2xl font-bold text-slate-900 mb-6 border-b pb-4">Tok peněz v čase (Cash-flow)</h3>
+                        <div class="bg-${data.themeColor}-50 text-${data.themeColor}-900 inline-block px-4 py-2 rounded-lg font-bold text-sm uppercase tracking-wider mb-4 border border-${data.themeColor}-200 shadow-sm">
+                            Režim: ${data.cashflowType}
+                        </div>
+                        <p class="text-slate-700 font-sans mb-8 leading-relaxed max-w-4xl text-lg">${data.cashflowDesc}</p>
+                        
+                        <!-- Timeline Graphic (CSS only) -->
+                        <div class="flex flex-col md:flex-row justify-between items-center w-full relative pt-4 pb-8 px-4 bg-slate-100 rounded-2xl border border-slate-200">
+                            <!-- Connecting Line Background for Desktop -->
+                            <div class="hidden md:block absolute top-1/2 left-10 right-10 h-1 bg-slate-300 transform -translate-y-1/2 z-0"></div>
+                            ${stepsHtml}
+                        </div>
+                    </div>
+
+                    <!-- Mini Case Study -->
+                    <div class="bg-brand-dark rounded-3xl p-8 md:p-10 text-white relative shadow-2xl overflow-hidden mt-8">
+                        <!-- Decorative element -->
+                        <div class="absolute top-0 right-0 w-64 h-64 bg-${data.themeColor}-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -mr-20 -mt-20"></div>
+                        
+                        <div class="relative z-10">
+                            <span class="text-${data.themeColor}-400 font-bold font-sans text-xs uppercase tracking-widest mb-3 block flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-${data.themeColor}-400"></span> Případová studie z praxe
+                            </span>
+                            <h4 class="text-2xl md:text-3xl font-bold mb-6">${data.caseStudy.title}</h4>
+                            
+                            <div class="flex flex-col md:flex-row gap-8 mb-8">
+                                <div class="md:w-1/4 bg-slate-800/50 p-5 rounded-2xl border border-slate-700/50 backdrop-blur-sm">
+                                    <span class="text-slate-400 font-sans text-xs uppercase tracking-wide block mb-1">Původní rozpočet</span>
+                                    <p class="font-black text-2xl md:text-3xl text-white">${data.caseStudy.cost}</p>
+                                </div>
+                                <div class="md:w-3/4">
+                                    <p class="font-sans text-slate-300 leading-relaxed text-lg mb-4">
+                                        <strong class="text-white">Situace:</strong> ${data.caseStudy.story}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gradient-to-r from-${data.themeColor}-900/40 to-slate-900/40 p-6 md:p-8 rounded-2xl border border-${data.themeColor}-800/30">
+                                <span class="text-${data.themeColor}-300 font-sans text-xs uppercase tracking-wide block mb-3 font-bold">Řešení a výsledek</span>
+                                <p class="font-sans text-slate-200 leading-relaxed text-lg">
+                                    ${data.caseStudy.solution}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            `;
+
+            container.innerHTML = '';
+            container.appendChild(newContent);
+        }
+
+        // Initialize with SFPI
+        window.onload = () => loadProvider('sfpi');
+
+    </script>
+</body>
+</html>

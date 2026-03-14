@@ -7,7 +7,6 @@
     { "src": "/dotace/", "dest": "/dotace-nastroje/index.html" },
     { "src": "/o-dotacich", "dest": "/o-dotacich/index.html" },
     { "src": "/o-dotacich/", "dest": "/o-dotacich/index.html" },
-    { "src": "/data/config.json", "dest": "/Loucovice_index.helloweb/data/config.json" },
     { "src": "/", "dest": "/Loucovice_index.helloweb/index.html" },
     { "src": "/(.*)", "dest": "/Loucovice_index.helloweb/$1" }
   ]
