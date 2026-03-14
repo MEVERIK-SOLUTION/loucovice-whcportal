@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="cs" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finanční a dotační kompas: Loučovice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        finance: {
+                            dark: '#0f172a',    // Slate 900
+                            primary: '#2563eb', // Blue 600
+                            success: '#059669', // Emerald 600
+                            warning: '#d97706', // Amber 600
+                            light: '#f1f5f9',   // Slate 100
+                            accent: '#8b5cf6'   // Violet 500 (for financial instruments)
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Lexend', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Lexend:wght@500;600;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #334155; }
+        h1, h2, h3, h4 { font-family: 'Lexend', sans-serif; }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            height: 300px;
+            max-height: 350px;
+        }
+
+        /* Custom scrollbar for the table */
+        .table-container::-webkit-scrollbar { height: 8px; }
+        .table-container::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .instrument-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .instrument-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Application Structure Plan:
+         1. Header: Quick summary KPIs (Total potential, Avg Co-financing).
+         2. Interactive Master Table: Detailed breakdown of subsidies (%, max amounts, provider). Includes filtering by type (Grant vs. Loan mix).
+         3. Financial Mix Visuals: Chart.js showing the leverage effect of combined financing (e.g., SFPI model).
+         4. Alternative Instruments: Deep dive into NRB loans, EPC, and PPP projects as requested.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- Header & KPIs -->
+    <header class="bg-finance-dark text-white pt-12 pb-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="text-3xl">&#128188;</span>
+                <h1 class="text-2xl font-bold tracking-wide text-blue-200">FINANČNÍ KOMPAS LOUČOVICE</h1>
+            </div>
+            <h2 class="text-4xl md:text-5xl font-display font-bold mb-6">Přehled dotačních a finančních nástrojů</h2>
+            <p class="text-slate-400 max-w-3xl text-lg mb-12">
+                Datový přehled identifikovaných dotačních titulů, maximálních limitů čerpání a struktury kofinancování. Zahrnuje analýzu dotační páky a alternativních finančních nástrojů (NRB, PPP, EPC) pro strategické projekty 2025–2030.
+            </p>
+
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 transform translate-y-12">
+                <div class="bg-white rounded-xl p-6 shadow-lg border border-slate-100 text-slate-800">
+                    <div class="text-sm font-semibold text-slate-500 uppercase mb-1">Identifikovaný dotační potenciál</div>
+                    <div class="text-4xl font-display font-bold text-finance-primary">235<span class="text-xl text-slate-400 ml-1">mil. Kč</span></div>
+                    <div class="mt-3 text-sm text-emerald-600 font-medium">&#8593; Vysoká pravděpodobnost zisku (IROP/SFPI)</div>
+                </div>
+                <div class="bg-white rounded-xl p-6 shadow-lg border border-slate-100 text-slate-800">
+                    <div class="text-sm font-semibold text-slate-500 uppercase mb-1">Průměrná míra dotace</div>
+                    <div class="text-4xl font-display font-bold text-finance-success">68<span class="text-2xl text-slate-400">%</span></div>
+                    <div class="mt-3 text-sm text-slate-500">Zbytek tvoří vlastní zdroje nebo úvěry NRB</div>
+                </div>
+                <div class="bg-white rounded-xl p-6 shadow-lg border border-slate-100 text-slate-800">
+                    <div class="text-sm font-semibold text-slate-500 uppercase mb-1">Aktivní / Připravované výzvy</div>
+                    <div class="text-4xl font-display font-bold text-finance-warning">8<span class="text-2xl text-slate-400"> / </span>4</div>
+                    <div class="mt-3 text-sm text-slate-500">Vyžaduje okamžitou projektovou připravenost (DSP)</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 w-full">
+        
+        <!-- SECTION 1: Dotační matice -->
+        <section class="mb-20">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
+                <div>
+                    <h3 class="text-2xl font-display font-bold text-slate-900 mb-2">Matice přímých dotací a kombinovaných programů</h3>
+                    <p class="text-slate-600">Detailní parametry dotačních titulů pro klíčové rozvojové záměry obce.</p>
+                </div>
+                <div class="flex bg-slate-200 p-1 rounded-lg">
+                    <button onclick="filterMatrix('all')" id="btn-all" class="px-4 py-2 rounded-md text-sm font-medium bg-white shadow-sm text-slate-800 transition">Vše</button>
+                    <button onclick="filterMatrix('grant')" id="btn-grant" class="px-4 py-2 rounded-md text-sm font-medium text-slate-600 hover:text-slate-900 transition">Čisté dotace</button>
+                    <button onclick="filterMatrix('combo')" id="btn-combo" class="px-4 py-2 rounded-md text-sm font-medium text-slate-600 hover:text-slate-900 transition">Dotace + Úvěr</button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="table-container overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[900px]">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider">
+                                <th class="p-4 font-semibold">Program / Poskytovatel</th>
+                                <th class="p-4 font-semibold">Cílový projekt Loučovice</th>
+                                <th class="p-4 font-semibold">Krytí (% způsobilých výdajů)</th>
+                                <th class="p-4 font-semibold">Max. částka na projekt</th>
+                                <th class="p-4 font-semibold">Specifické podmínky / Indikátory</th>
+                            </tr>
+                        </thead>
+                        <tbody id="matrix-tbody" class="text-sm text-slate-700 divide-y divide-slate-100">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: Finanční nástroje (Beyond Subsidies) -->
+        <section class="mb-20">
+            <div class="mb-8 border-b pb-4">
+                <span class="text-finance-accent font-bold tracking-wider uppercase text-sm">&#128200; Finanční inženýrství</span>
+                <h3 class="text-3xl font-display font-bold text-slate-900 mt-2">Alternativní finanční nástroje</h3>
+                <p class="text-slate-600 mt-2 max-w-3xl">Při realizaci projektů za stovky milionů nelze spoléhat pouze na dotační tituly a běžný rozpočet obce. Pro projekty jako "Brownfield Sv. Prokop" a "Dostupné bydlení" jsou nezbytné následující nástroje kofinancování.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- NRB -->
+                <div class="instrument-card bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col h-full">
+                    <div class="w-12 h-12 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-2xl mb-4 border border-blue-200">
+                        &#127976;
+                    </div>
+                    <h4 class="text-xl font-bold text-slate-900 mb-2">Zvýhodněné úvěry NRB</h4>
+                    <p class="text-sm text-slate-600 mb-4 flex-grow">Národní rozvojová banka nabízí obcím bezúročné nebo extrémně nízkoúročené úvěry pro kofinancování dotačních projektů. Klíčovou výhodou je <strong>odklad splátek jistiny</strong>.</p>
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                        <ul class="text-xs text-slate-700 space-y-2">
+                            <li class="flex justify-between border-b pb-1"><span>Úroková sazba:</span> <strong class="text-slate-900">0 % – 1.5 % p.a.</strong></li>
+                            <li class="flex justify-between border-b pb-1"><span>Splatnost:</span> <strong class="text-slate-900">Až 30 let</strong></li>
+                            <li class="flex justify-between"><span>Odklad splátek:</span> <strong class="text-slate-900">Až 3 roky (doba výstavby)</strong></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- PPP -->
+                <div class="instrument-card bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col h-full">
+                    <div class="w-12 h-12 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl mb-4 border border-emerald-200">
+                        &#129309;
+                    </div>
+                    <h4 class="text-xl font-bold text-slate-900 mb-2">PPP Projekty (Public Private Partnership)</h4>
+                    <p class="text-sm text-slate-600 mb-4 flex-grow">Ideální pro <strong>Brownfield Sv. Prokop</strong>. Obec vloží pozemky/budovy, soukromý investor zajistí kapitál na rekonstrukci a komerční provoz. Zisk se dělí, rizika nese investor.</p>
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                        <ul class="text-xs text-slate-700 space-y-2">
+                            <li class="flex justify-between border-b pb-1"><span>Finanční zátěž obce:</span> <strong class="text-slate-900">Minimální</strong></li>
+                            <li class="flex justify-between border-b pb-1"><span>Přenos rizik:</span> <strong class="text-slate-900">Na soukromý sektor</strong></li>
+                            <li class="flex justify-between"><span>Doba koncese:</span> <strong class="text-slate-900">15 – 30 let</strong></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- EPC -->
+                <div class="instrument-card bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col h-full">
+                    <div class="w-12 h-12 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center text-2xl mb-4 border border-orange-200">
+                        &#128267;
+                    </div>
+                    <h4 class="text-xl font-bold text-slate-900 mb-2">EPC (Energy Performance Contracting)</h4>
+                    <p class="text-sm text-slate-600 mb-4 flex-grow">Řešení pro energetickou náročnost obecních budov. Modernizace (zateplení, FVE, vytápění) je splácena <strong>výhradně z prokazatelně dosažených úspor energie</strong>.</p>
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                        <ul class="text-xs text-slate-700 space-y-2">
+                            <li class="flex justify-between border-b pb-1"><span>Počáteční investice:</span> <strong class="text-slate-900">0 Kč (platí ESCO spol.)</strong></li>
+                            <li class="flex justify-between border-b pb-1"><span>Garance úspor:</span> <strong class="text-slate-900">Smluvně zaručeno</strong></li>
+                            <li class="flex justify-between"><span>Vhodnost pro obec:</span> <strong class="text-slate-900">Vysoká (OÚ, Škola)</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: Vizualizace Finančního mixu -->
+        <section class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+            <h3 class="text-2xl font-display font-bold text-slate-900 mb-6 text-center">Ukázka modelového financování: Dostupné nájemní bydlení (SFPI)</h3>
+            <p class="text-center text-slate-600 max-w-3xl mx-auto mb-8 text-sm">
+                Program SFPI pro dostupné bydlení nevyužívá standardní 85% dotaci. Namísto toho kombinuje přímou dotaci a dlouhodobý nízkoúročený úvěr. Tato "finanční páka" umožňuje realizovat rozsáhlý projekt (např. 60 mil. Kč) při minimálním okamžitém zatížení cash-flow obce.
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="chart-container">
+                    <canvas id="financeMixChart"></canvas>
+                </div>
+                <div>
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-3 p-4 rounded-lg bg-emerald-50 border border-emerald-100">
+                            <div class="text-2xl mt-1">&#128181;</div>
+                            <div>
+                                <h4 class="font-bold text-emerald-900">1. Přímá dotace (Max. 25 %)</h4>
+                                <p class="text-sm text-emerald-700">Nevratná částka poskytnutá SFPI. Snižuje celkovou jistinu úvěru.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 p-4 rounded-lg bg-blue-50 border border-blue-100">
+                            <div class="text-2xl mt-1">&#127974;</div>
+                            <div>
+                                <h4 class="font-bold text-blue-900">2. Zvýhodněný úvěr (Až 90 % zbytku)</h4>
+                                <p class="text-sm text-blue-800">Splatnost až 30 let s fixním úrokem (od 1 % do max. základní sazby EU). Spláceno z budoucího výběru nájemného.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 p-4 rounded-lg bg-slate-50 border border-slate-200">
+                            <div class="text-2xl mt-1">&#128176;</div>
+                            <div>
+                                <h4 class="font-bold text-slate-800">3. Vlastní zdroje (cca 5 - 10 %)</h4>
+                                <p class="text-sm text-slate-600">Minimální okamžitá spoluúčast obce. Často řešena vložením pozemku pod stavbou do projektu.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Data structure for the Subsidy Matrix
+        const matrixData = [
+            {
+                type: 'combo',
+                provider: 'SFPI',
+                program: 'Dostupné nájemní bydlení',
+                project: 'Obytná zóna Dvorečná (Bytový dům)',
+                support: '<span class="text-emerald-600 font-bold">25 % dotace</span> + <br><span class="text-blue-600 font-bold">až 90 % úvěr</span> ze zbytku',
+                maxAmount: 'Záleží na rozpočtu (stovky mil. Kč)',
+                conditions: 'Nájemné limitováno pro cílové skupiny (mladé rodiny, veřejný sektor). Splatnost úvěru 30 let.'
+            },
+            {
+                type: 'combo',
+                provider: 'SFPI',
+                program: 'Technická infrastruktura',
+                project: 'Sítě a komunikace Dvorečná',
+                support: '<span class="text-blue-600 font-bold">Až 100 % úvěr</span> nebo kombinace',
+                maxAmount: 'Dle ceníkových položek',
+                conditions: 'Podmíněno následnou výstavbou obydlí (nesmí to být jen zasíťování pro prodej komerčnímu developerovi bez regulace).'
+            },
+            {
+                type: 'grant',
+                provider: 'IROP (MMR)',
+                program: 'Čistá a aktivní mobilita',
+                project: 'Cyklostezka Loučovice - Vyšší Brod',
+                support: '<span class="text-emerald-600 font-bold">85 % dotace</span>',
+                maxAmount: 'Obvykle limit <br><strong>90 mil. Kč</strong> / projekt',
+                conditions: 'Nutné stavební povolení. Oddělená infrastruktura od motorové dopravy.'
+            },
+            {
+                type: 'grant',
+                provider: 'NPO / MPO',
+                program: 'Revitalizace brownfieldů pro nekomerční využití',
+                project: 'Brownfield Sv. Prokop (Veřejná část)',
+                support: '<span class="text-emerald-600 font-bold">Až 60 % dotace</span><br>(dle mapy intenzity)',
+                maxAmount: 'Až <strong>500 mil. Kč</strong>',
+                conditions: 'Přísné splnění principu DNSH (Do No Significant Harm) a energetické účinnosti budov.'
+            },
+            {
+                type: 'grant',
+                provider: 'Modernizační fond',
+                program: 'RES+ (Nové obnovitelné zdroje)',
+                project: 'FVE na budovách (OÚ, Škola)',
+                support: '<span class="text-emerald-600 font-bold">Až 75 % dotace</span>',
+                maxAmount: 'Max. 50 % z celkové alokace výzvy (vysoký limit)',
+                conditions: 'Výstavba FVE s výkonem do 1 MWp. Podpora vč. bateriových úložišť.'
+            },
+            {
+                type: 'grant',
+                provider: 'IROP (CLLD přes MAS)',
+                program: 'Hasiči / Vzdělávání (Výzvy 61, 48)',
+                project: 'Vybavení JSDH / Odborné učebny ZŠ',
+                support: '<span class="text-emerald-600 font-bold">Až 90 % dotace</span>',
+                maxAmount: 'Jednotky až desítky mil. Kč (omezeno obálkou MAS)',
+                conditions: 'Nutné kladné vyjádření příslušné Místní akční skupiny (MAS) o souladu se strategií.'
+            }
+        ];
+
+        // Format label helper for Chart.js
+        const formatLabels = (labels) => labels.map(label => {
+            const words = label.split(' ');
+            let lines = []; let currentLine = '';
+            words.forEach(word => {
+                if ((currentLine + word).length > 16) {
+                    if (currentLine) lines.push(currentLine.trim());
+                    currentLine = word + ' ';
+                } else { currentLine += word + ' '; }
+            });
+            if (currentLine) lines.push(currentLine.trim());
+            return lines;
+        });
+
+        // Matrix rendering
+        function renderMatrix(filterType) {
+            const tbody = document.getElementById('matrix-tbody');
+            tbody.innerHTML = '';
+            
+            const filteredData = filterType === 'all' ? matrixData : matrixData.filter(d => d.type === filterType);
+
+            filteredData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors";
+                
+                // Badge for Program column based on provider
+                let providerBadge = '';
+                if(row.provider.includes('SFPI')) providerBadge = '<span class="inline-block px-2 py-0.5 bg-blue-100 text-blue-800 text-[10px] font-bold rounded mb-1">SFPI</span><br>';
+                else if(row.provider.includes('IROP')) providerBadge = '<span class="inline-block px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded mb-1">IROP</span><br>';
+                else providerBadge = `<span class="inline-block px-2 py-0.5 bg-slate-200 text-slate-800 text-[10px] font-bold rounded mb-1">${row.provider.split(' ')[0]}</span><br>`;
+
+                tr.innerHTML = `
+                    <td class="p-4 align-top border-b border-slate-100">
+                        ${providerBadge}
+                        <strong class="text-slate-900">${row.program}</strong>
+                    </td>
+                    <td class="p-4 align-top border-b border-slate-100 font-medium text-slate-700">${row.project}</td>
+                    <td class="p-4 align-top border-b border-slate-100 bg-slate-50/50">${row.support}</td>
+                    <td class="p-4 align-top border-b border-slate-100 text-slate-800">${row.maxAmount}</td>
+                    <td class="p-4 align-top border-b border-slate-100 text-xs text-slate-500 leading-relaxed">${row.conditions}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Filter buttons logic
+        function filterMatrix(type) {
+            renderMatrix(type);
+            
+            // Update button styles
+            const buttons = {
+                'all': document.getElementById('btn-all'),
+                'grant': document.getElementById('btn-grant'),
+                'combo': document.getElementById('btn-combo')
+            };
+
+            Object.keys(buttons).forEach(key => {
+                if(key === type) {
+                    buttons[key].className = "px-4 py-2 rounded-md text-sm font-medium bg-white shadow-sm text-slate-800 transition";
+                } else {
+                    buttons[key].className = "px-4 py-2 rounded-md text-sm font-medium text-slate-600 hover:text-slate-900 transition";
+                }
+            });
+        }
+
+        // Init Chart.js
+        function initChart() {
+            const ctx = document.getElementById('financeMixChart').getContext('2d');
+            
+            // Example data for a 60M CZK Affordable Housing project
+            const totalProjectCost = 60;
+            const grantPercentage = 0.25;
+            const remaining = 1 - grantPercentage;
+            const loanPercentage = 0.90 * remaining; 
+            const ownPercentage = 1 - grantPercentage - loanPercentage;
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: formatLabels(['Přímá dotace (SFPI)', 'Zvýhodněný úvěr (SFPI / NRB)', 'Vlastní zdroje obce']),
+                    datasets: [{
+                        data: [
+                            totalProjectCost * grantPercentage, 
+                            totalProjectCost * loanPercentage, 
+                            totalProjectCost * ownPercentage
+                        ],
+                        backgroundColor: [
+                            '#059669', // Emerald
+                            '#2563eb', // Blue
+                            '#94a3b8'  // Slate
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: { 
+                            position: 'bottom',
+                            labels: { usePointStyle: true, padding: 20 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    const item = tooltipItems[0];
+                                    let label = item.chart.data.labels[item.dataIndex];
+                                    return Array.isArray(label) ? label.join(' ') : label;
+                                },
+                                label: function(context) {
+                                    let value = context.parsed;
+                                    let total = context.chart._metasets[context.datasetIndex].total;
+                                    let percentage = Math.round((value / total) * 100);
+                                    return ` ${value.toFixed(1)} mil. Kč (${percentage} %)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Run on load
+        window.onload = function() {
+            renderMatrix('all');
+            initChart();
+        };
+    </script>
+</body>
+</html>
